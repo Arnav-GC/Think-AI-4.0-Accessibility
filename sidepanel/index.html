@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniAccess AI - Accessibility Assistant</title>
+  <link rel="stylesheet" href="sidepanel.css" />
+</head>
+<body>
+
+  <!-- Skip navigation link for screen readers / keyboard users -->
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+
+  <!-- ========== HEADER ========== -->
+  <header class="app-header" role="banner">
+    <div class="header-logo" aria-hidden="true">
+      <!-- Accessibility icon SVG -->
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24"
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+           stroke-linejoin="round" class="logo-svg" aria-hidden="true" focusable="false">
+        <circle cx="12" cy="12" r="10"/>
+        <circle cx="12" cy="8" r="1.5" fill="currentColor" stroke="none"/>
+        <path d="M8 12h8M10 16l2-4 2 4"/>
+        <path d="M9 12c0 0 0 3 3 3s3-3 3-3"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1 class="app-name">OmniAccess AI</h1>
+      <p class="app-subtitle">Your Accessibility Assistant</p>
+    </div>
+  </header>
+
+  <!-- ========== PROFILE SELECTOR ========== -->
+  <section class="profile-section" aria-labelledby="profile-label">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+      <label id="profile-label" for="profile-select" class="profile-label">
+        Accessibility Profile
+      </label>
+      <button id="btn-reset-profile" type="button" class="btn btn-secondary" style="padding: 3px 8px; font-size: 11px; font-weight: 700; border-radius: 6px; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+        ✕ Turn Off Profile
+      </button>
+    </div>
+    <select id="profile-select" class="profile-select" aria-describedby="profile-desc">
+      <option value="custom">Off / Default (No Overlays)</option>
+      <option value="low_vision">Low Vision</option>
+      <option value="blind_screen_reader">Blind / Screen Reader</option>
+      <option value="motor_switch">Motor / Switch Access</option>
+      <option value="cognitive_dyslexia">Cognitive / Dyslexia</option>
+      <option value="deaf_hard_of_hearing">Deaf / Hard of Hearing</option>
+    </select>
+    <p id="profile-desc" class="helper-text">
+      Selecting a profile loads preset features. Click <strong>Turn Off Profile</strong> to deactivate all active overlays.
+    </p>
+  </section>
+
+  <!-- ========== TAB NAVIGATION ========== -->
+  <main id="main-content">
+    <div class="tab-bar" role="tablist" aria-label="Settings Categories">
+      <button
+        class="tab-btn active"
+        role="tab"
+        id="tab-input"
+        aria-controls="panel-input"
+        aria-selected="true"
+        tabindex="0">
+        Input
+      </button>
+      <button
+        class="tab-btn"
+        role="tab"
+        id="tab-output"
+        aria-controls="panel-output"
+        aria-selected="false"
+        tabindex="-1">
+        Output
+      </button>
+      <button
+        class="tab-btn"
+        role="tab"
+        id="tab-visual"
+        aria-controls="panel-visual"
+        aria-selected="false"
+        tabindex="-1">
+        Visual
+      </button>
+      <button
+        class="tab-btn"
+        role="tab"
+        id="tab-ai"
+        aria-controls="panel-ai"
+        aria-selected="false"
+        tabindex="-1">
+        AI &amp; Tools
+      </button>
+    </div>
+
+    <!-- ======== INPUT TAB PANEL ======== -->
+    <div
+      class="tab-panel active"
+      id="panel-input"
+      role="tabpanel"
+      aria-labelledby="tab-input"
+      tabindex="0">
+
+      <!-- Voice Navigation -->
+      <section class="section-card" aria-labelledby="voice-heading">
+        <h2 id="voice-heading" class="section-title">Voice Navigation</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="voice-toggle">
+            <span class="toggle-text">Enable Voice Navigation</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="voice-toggle" class="toggle-input"
+                     aria-describedby="voice-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="voice-toggle-desc" class="helper-text">
+            Use voice commands to navigate and interact with web pages.
+          </p>
+          <div style="display: flex; gap: 8px; margin-top: 10px;">
+            <button id="btn-start-mic" type="button" class="btn btn-primary" style="flex: 1; padding: 7px 12px; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; cursor: pointer;">
+              🎙️ Start Mic
+            </button>
+            <button id="btn-stop-mic" type="button" class="btn btn-secondary" style="flex: 1; padding: 7px 12px; font-size: 13px; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border-radius: 6px; cursor: pointer; background: rgba(239, 68, 68, 0.15); border: 1px solid rgba(239, 68, 68, 0.4); color: #fca5a5;">
+              ⏹ Stop Mic
+            </button>
+          </div>
+          <div id="mic-live-banner" style="margin-top: 10px; padding: 8px 10px; background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 6px; font-size: 12px; display: flex; align-items: center; justify-content: space-between;">
+            <span id="mic-status-label" style="display: inline-flex; align-items: center; gap: 6px; font-weight: 600; color: #94a3b8;">
+              <span id="mic-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #64748b;"></span>
+              Mic Idle / Off
+            </span>
+            <span id="mic-live-text" style="color: #cbd5e1; font-style: italic; max-width: 170px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+          </div>
+        </div>
+
+        <fieldset class="radio-group" id="listening-mode-group" aria-describedby="listen-mode-desc">
+          <legend class="radio-legend">Listening Mode</legend>
+          <p id="listen-mode-desc" class="helper-text">Choose how voice commands are activated.</p>
+          <label class="radio-label">
+            <input type="radio" name="listening-mode" value="continuous" id="mode-continuous" />
+            <span>Continuous Listening</span>
+          </label>
+          <label class="radio-label">
+            <input type="radio" name="listening-mode" value="push_to_talk" id="mode-push" />
+            <span>Push-to-Talk</span>
+          </label>
+        </fieldset>
+
+        <!-- Voice Commands Cheat Sheet -->
+        <details style="margin-top: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px;">
+          <summary style="cursor: pointer; font-weight: 700; color: #60a5fa; user-select: none; display: flex; align-items: center; justify-content: space-between;">
+            <span>📖 View All Voice Commands</span>
+            <span style="font-size: 11px; opacity: 0.7;">▼</span>
+          </summary>
+          <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px; font-size: 12px; line-height: 1.5; color: #cbd5e1;">
+            <div>
+              <strong style="color: #fff;">Media & Playback:</strong>
+              <div style="color: #94a3b8; margin-top: 2px;">• "play" / "play video" / "resume"</div>
+              <div style="color: #94a3b8;">• "pause" / "pause video" / "freeze"</div>
+              <div style="color: #94a3b8;">• "volume up" / "volume down" / "mute" / "unmute"</div>
+            </div>
+            <div>
+              <strong style="color: #fff;">Screen & Brightness:</strong>
+              <div style="color: #94a3b8; margin-top: 2px;">• "brightness up" / "make brighter"</div>
+              <div style="color: #94a3b8;">• "brightness down" / "dim screen"</div>
+              <div style="color: #94a3b8;">• "zoom in" / "zoom out" / "fullscreen"</div>
+            </div>
+            <div>
+              <strong style="color: #fff;">Navigation & Clicks:</strong>
+              <div style="color: #94a3b8; margin-top: 2px;">• "show numbers" (places badges on links/buttons)</div>
+              <div style="color: #94a3b8;">• "click [number or name]" (e.g. "click 3" or "click search")</div>
+              <div style="color: #94a3b8;">• "scroll down" / "scroll up" / "top" / "bottom"</div>
+              <div style="color: #94a3b8;">• "go back" / "go forward" / "reload"</div>
+            </div>
+            <div>
+              <strong style="color: #fff;">Microphone & AI:</strong>
+              <div style="color: #94a3b8; margin-top: 2px;">• "stop listening" / "turn off mic" / "mute mic"</div>
+              <div style="color: #94a3b8;">• "read page" / "stop reading"</div>
+              <div style="color: #94a3b8;">• "simplify text" / "high contrast" / "captions"</div>
+            </div>
+            <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border); text-align: center;">
+              <a id="link-voice-commands" href="website.html#voice-commands" target="_blank" rel="noopener noreferrer" style="color: #60a5fa; text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 5px; font-size: 12px; cursor: pointer;">
+                <span>🌐 Open Full Voice Commands Guide in New Tab</span>
+                <span style="font-size: 14px;">↗</span>
+              </a>
+            </div>
+          </div>
+        </details>
+      </section>
+
+      <!-- Gaze / Webcam -->
+      <section class="section-card" aria-labelledby="gaze-heading">
+        <h2 id="gaze-heading" class="section-title">Gaze / Webcam Control</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="gaze-toggle">
+            <span class="toggle-text">Enable Gaze Tracking</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="gaze-toggle" class="toggle-input"
+                     aria-describedby="gaze-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="gaze-toggle-desc" class="helper-text">
+            Use your webcam and eye gaze to control the cursor.
+          </p>
+        </div>
+
+        <div class="slider-group">
+          <label for="dwell-time-slider" class="slider-label">
+            Dwell Time:
+            <span id="dwell-time-value" class="slider-value" aria-live="polite">1.00s</span>
+          </label>
+          <input
+            type="range"
+            id="dwell-time-slider"
+            class="range-slider"
+            min="0.5"
+            max="3.0"
+            step="0.25"
+            value="1.0"
+            aria-describedby="dwell-time-desc"
+            aria-valuemin="0.5"
+            aria-valuemax="3.0"
+            aria-valuenow="1.0"
+            aria-valuetext="1.00 seconds" />
+          <p id="dwell-time-desc" class="helper-text">
+            How long to dwell on an element before it activates (0.5s – 3.0s).
+          </p>
+        </div>
+      </section>
+
+      <!-- Switch Access -->
+      <section class="section-card" aria-labelledby="switch-heading">
+        <h2 id="switch-heading" class="section-title">Switch Access</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="switch-toggle">
+            <span class="toggle-text">Enable Switch Access</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="switch-toggle" class="toggle-input"
+                     aria-describedby="switch-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="switch-toggle-desc" class="helper-text">
+            Navigate using one or more physical switch devices.
+          </p>
+        </div>
+
+        <div class="slider-group">
+          <label for="scan-speed-slider" class="slider-label">
+            Scan Speed:
+            <span id="scan-speed-value" class="slider-value" aria-live="polite">2.00s</span>
+          </label>
+          <input
+            type="range"
+            id="scan-speed-slider"
+            class="range-slider"
+            min="0.5"
+            max="5.0"
+            step="0.5"
+            value="2.0"
+            aria-describedby="scan-speed-desc"
+            aria-valuemin="0.5"
+            aria-valuemax="5.0"
+            aria-valuenow="2.0"
+            aria-valuetext="2.00 seconds" />
+          <p id="scan-speed-desc" class="helper-text">
+            Time between automatic scan steps (0.5s – 5.0s).
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="scan-mode-select" class="select-label">Scan Mode</label>
+          <select id="scan-mode-select" class="styled-select" aria-describedby="scan-mode-desc">
+            <option value="auto">Automatic Scan</option>
+            <option value="manual">Manual Scan</option>
+          </select>
+          <p id="scan-mode-desc" class="helper-text">
+            Automatic advances the scan, manual requires switch press to advance.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="switch-key-select" class="select-label">Switch Key</label>
+          <select id="switch-key-select" class="styled-select" aria-describedby="switch-key-desc">
+            <option value="Space">Space Bar</option>
+            <option value="Enter">Enter Key</option>
+          </select>
+          <p id="switch-key-desc" class="helper-text">
+            Keyboard key that acts as the switch trigger.
+          </p>
+        </div>
+      </section>
+    </div><!-- /panel-input -->
+
+    <!-- ======== OUTPUT TAB PANEL ======== -->
+    <div
+      class="tab-panel"
+      id="panel-output"
+      role="tabpanel"
+      aria-labelledby="tab-output"
+      tabindex="0"
+      hidden>
+
+      <!-- Live Captions (Moved to top of Output tab for immediate visibility) -->
+      <section class="section-card" aria-labelledby="captions-heading" style="border: 1.5px solid #3b82f6;">
+        <h2 id="captions-heading" class="section-title" style="color: #60a5fa; display: flex; align-items: center; justify-content: space-between;">
+          <span>🎙️ Live Captions</span>
+          <span style="font-size: 11px; font-weight: normal; background: rgba(59,130,246,0.2); padding: 2px 8px; border-radius: 12px; color: #93c5fd;">Real-time</span>
+        </h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="captions-toggle">
+            <span class="toggle-text" style="font-weight: 600;">Enable Live Captions</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="captions-toggle" class="toggle-input"
+                     aria-describedby="captions-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="captions-toggle-desc" class="helper-text">
+            Display draggable real-time floating captions for microphone or media audio.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="caption-lang-select" class="select-label">Speech Recognition Language</label>
+          <select id="caption-lang-select" class="styled-select" aria-describedby="caption-lang-desc">
+            <option value="en-US" selected>English (US) [en-US]</option>
+            <option value="en-GB">English (UK) [en-GB]</option>
+            <option value="es-ES">Spanish [es-ES]</option>
+            <option value="fr-FR">French [fr-FR]</option>
+            <option value="de-DE">German [de-DE]</option>
+            <option value="hi-IN">Hindi [hi-IN]</option>
+            <option value="zh-CN">Chinese (Simplified) [zh-CN]</option>
+            <option value="ja-JP">Japanese [ja-JP]</option>
+            <option value="ar-SA">Arabic [ar-SA]</option>
+            <option value="pt-BR">Portuguese [pt-BR]</option>
+          </select>
+          <p id="caption-lang-desc" class="helper-text">
+            Choose the language being spoken into your microphone or media.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="caption-size-select" class="select-label">Caption Size</label>
+          <select id="caption-size-select" class="styled-select">
+            <option value="small">Small (16px)</option>
+            <option value="medium" selected>Medium (20px)</option>
+            <option value="large">Large (26px)</option>
+          </select>
+        </div>
+
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+          <button type="button" id="caption-test-btn" class="action-btn secondary" style="flex: 1; padding: 7px 10px; font-size: 12px;">
+            💬 Test Captions HUD
+          </button>
+        </div>
+      </section>
+
+      <!-- Audio Chimes -->
+      <section class="section-card" aria-labelledby="chimes-heading">
+        <h2 id="chimes-heading" class="section-title">Audio Feedback</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="audio-chimes-toggle">
+            <span class="toggle-text">Audio Chimes</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="audio-chimes-toggle" class="toggle-input"
+                     aria-describedby="chimes-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="chimes-desc" class="helper-text">
+            Play subtle chime sounds on interactions and events.
+          </p>
+        </div>
+
+        <div style="margin-top: 10px;">
+          <button type="button" id="test-chime-btn" class="action-btn secondary" style="width: 100%; padding: 6px 10px; font-size: 12px;">
+            🔔 Play Test Chime
+          </button>
+        </div>
+      </section>
+
+      <!-- Read Aloud -->
+      <section class="section-card" aria-labelledby="readaloud-heading">
+        <h2 id="readaloud-heading" class="section-title">Read Aloud (TTS)</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="read-aloud-toggle">
+            <span class="toggle-text">Enable Read Aloud</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="read-aloud-toggle" class="toggle-input"
+                     aria-describedby="readaloud-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="readaloud-toggle-desc" class="helper-text">
+            Read page content aloud using text-to-speech.
+          </p>
+        </div>
+
+        <div class="slider-group">
+          <label for="tts-speed-slider" class="slider-label">
+            Speech Speed:
+            <span id="tts-speed-value" class="slider-value" aria-live="polite">1.0×</span>
+          </label>
+          <input
+            type="range"
+            id="tts-speed-slider"
+            class="range-slider"
+            min="0.5"
+            max="2.0"
+            step="0.1"
+            value="1.0"
+            aria-valuemin="0.5"
+            aria-valuemax="2.0"
+            aria-valuenow="1.0"
+            aria-valuetext="1.0 times" />
+        </div>
+
+        <div class="slider-group">
+          <label for="tts-pitch-slider" class="slider-label">
+            Pitch:
+            <span id="tts-pitch-value" class="slider-value" aria-live="polite">1.0</span>
+          </label>
+          <input
+            type="range"
+            id="tts-pitch-slider"
+            class="range-slider"
+            min="0.5"
+            max="2.0"
+            step="0.1"
+            value="1.0"
+            aria-valuemin="0.5"
+            aria-valuemax="2.0"
+            aria-valuenow="1.0" />
+        </div>
+
+        <div class="select-group">
+          <label for="tts-voice-select" class="select-label">Voice</label>
+          <select id="tts-voice-select" class="styled-select" aria-describedby="voice-select-desc">
+            <option value="">Loading voices…</option>
+          </select>
+          <p id="voice-select-desc" class="helper-text">
+            Voices are provided by your operating system.
+          </p>
+        </div>
+      </section>
+
+      <!-- Sound Labels -->
+      <section class="section-card" aria-labelledby="sound-labels-heading">
+        <h2 id="sound-labels-heading" class="section-title">Sound Labels</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="sound-labels-toggle">
+            <span class="toggle-text">Show Sound Labels</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="sound-labels-toggle" class="toggle-input"
+                     aria-describedby="sound-labels-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="sound-labels-desc" class="helper-text">
+            Display on-screen text tags like [Music], [Applause] for ambient sounds.
+          </p>
+        </div>
+      </section>
+
+      <!-- Visual Alerts -->
+      <section class="section-card" aria-labelledby="visual-alerts-heading">
+        <h2 id="visual-alerts-heading" class="section-title">Visual &amp; Haptic</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="visual-alerts-toggle">
+            <span class="toggle-text">Visual Alerts</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="visual-alerts-toggle" class="toggle-input"
+                     aria-describedby="visual-alerts-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="visual-alerts-desc" class="helper-text">
+            Flash the screen border instead of playing sounds for alerts.
+          </p>
+        </div>
+
+        <div class="control-row">
+          <label class="toggle-label" for="haptic-toggle">
+            <span class="toggle-text">Haptic Feedback</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="haptic-toggle" class="toggle-input"
+                     aria-describedby="haptic-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="haptic-desc" class="helper-text">
+            Trigger device vibration on key events (mobile/supported devices only).
+          </p>
+        </div>
+      </section>
+    </div><!-- /panel-output -->
+
+    <!-- ======== VISUAL TAB PANEL ======== -->
+    <div
+      class="tab-panel"
+      id="panel-visual"
+      role="tabpanel"
+      aria-labelledby="tab-visual"
+      tabindex="0"
+      hidden>
+
+      <!-- High Contrast -->
+      <section class="section-card" aria-labelledby="contrast-heading">
+        <h2 id="contrast-heading" class="section-title">High Contrast</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="high-contrast-toggle">
+            <span class="toggle-text">Enable High Contrast</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="high-contrast-toggle" class="toggle-input"
+                     aria-describedby="contrast-toggle-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="contrast-toggle-desc" class="helper-text">
+            Apply a high-contrast colour theme to the current page.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="contrast-theme-select" class="select-label">Contrast Theme</label>
+          <select id="contrast-theme-select" class="styled-select">
+            <option value="yellow-black">Yellow on Black</option>
+            <option value="white-black">White on Black</option>
+            <option value="black-white">Black on White</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Large Cursor -->
+      <section class="section-card" aria-labelledby="cursor-heading">
+        <h2 id="cursor-heading" class="section-title">Cursor</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="large-cursor-toggle">
+            <span class="toggle-text">Large Cursor</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="large-cursor-toggle" class="toggle-input"
+                     aria-describedby="cursor-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="cursor-desc" class="helper-text">
+            Replace the default cursor with a larger, high-visibility cursor.
+          </p>
+        </div>
+      </section>
+
+      <!-- Zoom Level -->
+      <section class="section-card" aria-labelledby="zoom-heading">
+        <h2 id="zoom-heading" class="section-title">Page Zoom</h2>
+
+        <div class="slider-group">
+          <label for="zoom-slider" class="slider-label">
+            Zoom Level:
+            <span id="zoom-value" class="slider-value" aria-live="polite">100%</span>
+          </label>
+          <input
+            type="range"
+            id="zoom-slider"
+            class="range-slider"
+            min="80"
+            max="200"
+            step="5"
+            value="100"
+            aria-valuemin="80"
+            aria-valuemax="200"
+            aria-valuenow="100"
+            aria-valuetext="100 percent" />
+        </div>
+      </section>
+
+      <!-- Dyslexia Font -->
+      <section class="section-card" aria-labelledby="dyslexia-heading">
+        <h2 id="dyslexia-heading" class="section-title">Dyslexia-Friendly Font</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="dyslexia-font-toggle">
+            <span class="toggle-text">Enable Dyslexia Font</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="dyslexia-font-toggle" class="toggle-input"
+                     aria-describedby="dyslexia-font-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="dyslexia-font-desc" class="helper-text">
+            Apply a dyslexia-friendly typeface to all page text.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="dyslexia-font-select" class="select-label">Font Family</label>
+          <select id="dyslexia-font-select" class="styled-select">
+            <option value="Lexend">Lexend</option>
+            <option value="Atkinson">Atkinson Hyperlegible</option>
+            <option value="OpenDyslexic">OpenDyslexic</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- Bionic Reading -->
+      <section class="section-card" aria-labelledby="bionic-heading">
+        <h2 id="bionic-heading" class="section-title">Reading Enhancements</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="bionic-reading-toggle">
+            <span class="toggle-text">Bionic Reading</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="bionic-reading-toggle" class="toggle-input"
+                     aria-describedby="bionic-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="bionic-desc" class="helper-text">
+            Bold the first letters of each word to speed up reading.
+          </p>
+        </div>
+
+        <div class="control-row">
+          <label class="toggle-label" for="reading-ruler-toggle">
+            <span class="toggle-text">Reading Ruler</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="reading-ruler-toggle" class="toggle-input"
+                     aria-describedby="ruler-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="ruler-desc" class="helper-text">
+            Show a horizontal guide line that follows your cursor to aid tracking.
+          </p>
+        </div>
+
+        <div class="control-row">
+          <label class="toggle-label" for="text-spacing-toggle">
+            <span class="toggle-text">Increased Text Spacing</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="text-spacing-toggle" class="toggle-input"
+                     aria-describedby="spacing-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="spacing-desc" class="helper-text">
+            Increase letter spacing, word spacing, and line height for readability.
+          </p>
+        </div>
+      </section>
+    </div><!-- /panel-visual -->
+
+    <!-- ======== AI TOOLS TAB PANEL ======== -->
+    <div
+      class="tab-panel"
+      id="panel-ai"
+      role="tabpanel"
+      aria-labelledby="tab-ai"
+      tabindex="0"
+      hidden>
+
+      <!-- AI Provider -->
+      <section class="section-card" aria-labelledby="apikey-heading">
+        <h2 id="apikey-heading" class="section-title">AI Provider</h2>
+
+        <div class="select-group" style="margin-bottom: 12px;">
+          <label for="ai-provider-select" class="select-label">Provider</label>
+          <select id="ai-provider-select" class="styled-select" aria-describedby="provider-desc">
+            <option value="gemini">Google Gemini</option>
+            <option value="grok">Grok (xAI)</option>
+          </select>
+          <p id="provider-desc" class="helper-text">
+            Choose which AI service powers text simplification and image descriptions.
+          </p>
+        </div>
+
+        <div class="select-group">
+          <label for="api-key-input" class="select-label" id="api-key-label">API Key</label>
+          <div style="position: relative;">
+            <input
+              type="password"
+              id="api-key-input"
+              class="styled-input"
+              placeholder="Enter your Gemini API key…"
+              autocomplete="off"
+              aria-describedby="api-key-desc"
+              style="padding-right: 44px;" />
+            <button
+              type="button"
+              id="api-key-show-btn"
+              aria-label="Show/hide API key"
+              title="Show / hide key"
+              style="position:absolute;right:8px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text-secondary,#94a3b8);padding:4px;">
+              👁
+            </button>
+          </div>
+          <p id="api-key-desc" class="helper-text" id="api-key-hint">
+            Your key is saved automatically — you only need to enter it once.
+          </p>
+          <!-- Saved indicator -->
+          <div id="key-saved-badge"
+               style="display:none; margin-top:6px; font-size:12px; color:#4ade80; display:flex; align-items:center; gap:5px;"
+               aria-live="polite">
+            <span>✓</span><span>Key remembered</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="api-key-save-btn" class="btn-primary" type="button">
+            Save Key
+          </button>
+          <button id="api-key-test-btn" class="btn-secondary" type="button">
+            Test Key
+          </button>
+          <button id="api-key-clear-btn" class="btn-secondary" type="button" style="color:#fca5a5; border-color:rgba(239,68,68,0.3);" title="Remove saved key">
+            Clear
+          </button>
+        </div>
+        <div id="api-key-status" class="status-message" aria-live="polite" role="status"></div>
+
+        <div class="ai-model-info" id="ai-model-info" aria-live="polite">
+          <span class="model-label">Model:</span>
+          <span id="model-name" class="model-value">—</span>
+        </div>
+
+        <div style="margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 1rem;">
+          <button id="open-website-btn" class="btn-secondary" type="button" style="width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            <span>🌐 Open Showcase Website</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Simplify Text -->
+      <section class="section-card" aria-labelledby="simplify-heading">
+        <h2 id="simplify-heading" class="section-title">Simplify Text</h2>
+
+        <div class="select-group">
+          <label for="reading-level-select" class="select-label">Reading Level</label>
+          <select id="reading-level-select" class="styled-select" aria-describedby="level-desc">
+            <option value="elementary">Elementary (Grade 3–5)</option>
+            <option value="plain" selected>Plain English (Adult)</option>
+            <option value="summary">Brief Summary</option>
+          </select>
+          <p id="level-desc" class="helper-text">
+            Choose how the AI should simplify the page text.
+          </p>
+        </div>
+
+        <div class="button-row">
+          <button id="simplify-btn" class="btn-primary" type="button">
+            Simplify Page
+          </button>
+        </div>
+        <div id="simplify-status" class="status-message" aria-live="polite" role="status"></div>
+      </section>
+
+      <!-- Image Describer -->
+      <section class="section-card" aria-labelledby="images-heading">
+        <h2 id="images-heading" class="section-title">Image Describer</h2>
+        <p class="helper-text">
+          Use AI to generate descriptive alt text for images that are missing descriptions.
+        </p>
+
+        <div class="button-row">
+          <button id="describe-images-btn" class="btn-primary" type="button">
+            Describe Images on Page
+          </button>
+        </div>
+        <div id="images-status" class="status-message" aria-live="polite" role="status"></div>
+      </section>
+
+      <!-- WCAG Auditor -->
+      <section class="section-card" aria-labelledby="audit-heading">
+        <h2 id="audit-heading" class="section-title">WCAG Auditor</h2>
+        <p class="helper-text">
+          Scan the current page for accessibility issues and optionally auto-fix them.
+        </p>
+
+        <div class="button-row">
+          <button id="audit-btn" class="btn-primary" type="button">
+            Run WCAG Audit
+          </button>
+          <button id="auto-fix-btn" class="btn-secondary" type="button">
+            Auto-Fix Issues
+          </button>
+        </div>
+        <div id="audit-status" class="status-message" aria-live="polite" role="status"></div>
+
+        <div class="results-container" id="audit-results-container" hidden>
+          <h3 class="results-title" id="audit-results-heading">Audit Results</h3>
+          <pre
+            id="audit-results"
+            class="results-pre"
+            role="region"
+            aria-labelledby="audit-results-heading"
+            tabindex="0"></pre>
+        </div>
+      </section>
+    </div><!-- /panel-ai -->
+
+  </main><!-- /main-content -->
+
+  <!-- ========== FOOTER ========== -->
+  <footer class="app-footer" role="contentinfo">
+    <p class="footer-version">OmniAccess AI &mdash; v1.0.0</p>
+    <p class="footer-shortcut">
+      Keyboard shortcut: <kbd>Alt</kbd>+<kbd>A</kbd> to open/close panel
+    </p>
+  </footer>
+
+  <script src="sidepanel.js"></script>
+</body>
+</html>

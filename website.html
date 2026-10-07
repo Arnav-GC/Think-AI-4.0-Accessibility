@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniAccess AI — Intelligent Digital Accessibility</title>
+  <link rel="stylesheet" href="content/overlay.css" />
+  <style>
+    /* In-page High Contrast overrides */
+    html[data-omni-contrast="yellow-black"],
+    html[data-omni-contrast="yellow-black"] body {
+      background-color: #000000 !important;
+      color: #ffff00 !important;
+    }
+    html[data-omni-contrast="yellow-black"] .demo-card,
+    html[data-omni-contrast="yellow-black"] .feature-card,
+    html[data-omni-contrast="yellow-black"] .interactive-box,
+    html[data-omni-contrast="yellow-black"] header,
+    html[data-omni-contrast="yellow-black"] footer {
+      background-color: #000000 !important;
+      color: #ffff00 !important;
+      border-color: #ffff00 !important;
+    }
+    html[data-omni-contrast="yellow-black"] h1,
+    html[data-omni-contrast="yellow-black"] h2,
+    html[data-omni-contrast="yellow-black"] h3,
+    html[data-omni-contrast="yellow-black"] p,
+    html[data-omni-contrast="yellow-black"] span,
+    html[data-omni-contrast="yellow-black"] li {
+      color: #ffff00 !important;
+      -webkit-text-fill-color: #ffff00 !important;
+    }
+    html[data-omni-contrast="yellow-black"] .btn {
+      background: #000000 !important;
+      color: #ffff00 !important;
+      border: 2px solid #ffff00 !important;
+    }
+    html[data-omni-contrast="yellow-black"] .demo-tab-btn.active {
+      background: #ffff00 !important;
+      color: #000000 !important;
+    }
+
+    :root {
+      --bg: #0b1120;
+      --bg-gradient: radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.18) 0%, transparent 40%),
+                     radial-gradient(circle at 85% 25%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
+                     radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
+                     linear-gradient(180deg, #0b1120 0%, #0f172a 50%, #080d1a 100%);
+      --card-bg: rgba(23, 32, 54, 0.72);
+      --border: rgba(148, 163, 184, 0.15);
+      --accent: #3b82f6;
+      --accent-glow: rgba(59, 130, 246, 0.4);
+      --text: #f8fafc;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    }
+
+    body {
+      background: var(--bg-gradient);
+      background-attachment: fixed;
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* Skip link for accessibility */
+    .skip-link {
+      position: absolute;
+      top: -999px;
+      left: 1rem;
+      background: var(--accent);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      z-index: 1000;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .skip-link:focus {
+      top: 1rem;
+    }
+
+    header {
+      padding: 1.25rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      position: sticky;
+      top: 0;
+      background: rgba(11, 17, 32, 0.75);
+      z-index: 100;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: #fff;
+      text-decoration: none;
+    }
+
+    .brand-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #3b82f6, #60a5fa);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1.5rem;
+      align-items: center;
+    }
+
+    .nav-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .nav-link:hover {
+      color: #fff;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.7rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #3b82f6);
+      color: #fff;
+      box-shadow: 0 4px 14px var(--accent-glow);
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateY(-2px);
+    }
+
+    .hero {
+      max-width: 1100px;
+      margin: 4rem auto;
+      padding: 0 2rem;
+      text-align: center;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.35rem 0.9rem;
+      background: rgba(59, 130, 246, 0.1);
+      border: 1px solid rgba(59, 130, 246, 0.3);
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      color: #60a5fa;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 {
+      font-size: 3.5rem;
+      font-weight: 900;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.5rem;
+      background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .hero p {
+      font-size: 1.25rem;
+      color: var(--text-muted);
+      max-width: 760px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .hero-actions {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin-bottom: 3.5rem;
+    }
+
+    /* Live Demo / Playground Area */
+    .demo-container {
+      max-width: 1000px;
+      margin: 0 auto 6rem;
+      padding: 0 2rem;
+    }
+
+    .demo-card {
+      background: var(--card-bg);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 2.5rem;
+      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(59, 130, 246, 0.08);
+      position: relative;
+    }
+
+    .demo-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .demo-tabs {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .demo-tab-btn {
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.2s;
+    }
+    .demo-tab-btn.active {
+      background: rgba(59, 130, 246, 0.15);
+      border-color: rgba(59, 130, 246, 0.4);
+      color: #60a5fa;
+    }
+
+    .demo-content {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      text-align: left;
+    }
+
+    @media (max-width: 768px) {
+      .demo-content {
+        grid-template-columns: 1fr;
+      }
+      h1 { font-size: 2.5rem; }
+    }
+
+    .interactive-box {
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .features-grid {
+      max-width: 1100px;
+      margin: 0 auto 6rem;
+      padding: 0 2rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 2rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(59, 130, 246, 0.4);
+    }
+
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      display: inline-block;
+    }
+
+    .feature-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-desc {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 3rem 2rem;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#main" class="skip-link">Skip to main content</a>
+
+  <header role="banner">
+    <a href="#" class="brand">
+      <div class="brand-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M12 8v8"></path>
+          <path d="M8 12h8"></path>
+        </svg>
+      </div>
+      <span>OmniAccess AI</span>
+    </a>
+
+    <nav class="nav-links" aria-label="Main Navigation">
+      <a href="#features" class="nav-link">Features</a>
+      <a href="#demo" class="nav-link">Interactive Test</a>
+      <a href="#install" class="btn btn-primary">Install Extension</a>
+    </nav>
+  </header>
+
+  <main id="main">
+    <section class="hero">
+      <div class="badge">
+        <span>✨ Powered by Gemini Vision &amp; Chrome APIs</span>
+      </div>
+      <h1>Web Accessibility Without Barriers.</h1>
+      <p>
+        OmniAccess AI is a multimodal Chrome Assistant delivering voice navigation, AI chart and meme descriptions, cognitive text simplification, webcam gaze tracking, and real-time WCAG 2.2 auditing.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#demo" class="btn btn-primary">Try Interactive Web Demo</a>
+        <a href="#install" class="btn btn-secondary">Installation Guide</a>
+      </div>
+    </section>
+
+    <!-- ======= WELCOME / ENABLE FEATURES PROMPT ======= -->
+    <section id="welcome-prompt" style="max-width: 860px; margin: 0 auto 2.5rem; padding: 0 2rem;">
+      <div style="background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08)); border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 2rem 2.5rem;">
+        <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">👋 Welcome to OmniAccess AI</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
+          Nothing is enabled automatically. Choose which accessibility features you'd like to try:
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
+          <!-- Voice Nav -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;" id="opt-voice-label">
+            <input type="checkbox" id="opt-voice" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>🎙️ Voice Navigation</span>
+          </label>
+
+          <!-- Read Aloud -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
+            <input type="checkbox" id="opt-readaloud" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>🔊 Read Aloud (TTS)</span>
+          </label>
+
+          <!-- High Contrast -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
+            <input type="checkbox" id="opt-contrast" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>🎨 High Contrast</span>
+          </label>
+
+          <!-- Bionic Reading -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
+            <input type="checkbox" id="opt-bionic" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>📖 Bionic Reading</span>
+          </label>
+
+          <!-- Text Spacing -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
+            <input type="checkbox" id="opt-spacing" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>📐 Text Spacing</span>
+          </label>
+
+          <!-- Audio Chimes -->
+          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
+            <input type="checkbox" id="opt-chimes" style="width: 16px; height: 16px; cursor: pointer;" />
+            <span>🔔 Audio Chimes</span>
+          </label>
+        </div>
+
+        <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
+          <button id="btn-apply-features" class="btn btn-primary" style="padding: 0.6rem 1.4rem; font-size: 0.95rem;">
+            ✅ Apply Selected Features
+          </button>
+          <button id="btn-reset-features" class="btn btn-secondary" style="padding: 0.6rem 1.1rem; font-size: 0.9rem;">
+            ↩ Reset All
+          </button>
+          <span id="features-status" style="font-size: 0.88rem; color: var(--success); font-weight: 600;"></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Simulator -->
+    <section id="demo" class="demo-container">
+      <div class="demo-card">
+        <div class="demo-header">
+          <div>
+            <h2 style="font-size: 1.4rem; font-weight: 800;">Multimodal Accessibility Playground</h2>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Test alternative inputs and outputs directly on this page</p>
+          </div>
+          <div class="demo-tabs" role="tablist">
+            <button class="demo-tab-btn active" id="tab-voice">Voice &amp; Audio</button>
+            <button class="demo-tab-btn" id="tab-sim">Text Simplifier</button>
+            <button class="demo-tab-btn" id="tab-contrast">High Contrast</button>
+          </div>
+        </div>
+
+        <div class="demo-content">
+          <!-- Tab 1: Voice & Audio -->
+          <div id="panel-tab-voice" style="display: contents;">
+            <div class="interactive-box">
+              <h3 style="font-size: 1.1rem; color: #60a5fa;">🎤 Interactive Voice & Audio Sandbox</h3>
+              <p style="font-size: 0.95rem; color: #cbd5e1;">
+                Test real-time Speech Recognition navigation and audio feedback directly in your browser.
+              </p>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+                <button class="btn btn-primary" id="btn-demo-mic" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  🎙️ Start Voice Test
+                </button>
+                <button class="btn btn-secondary" id="btn-demo-chime" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  🔔 Test Audio Chime
+                </button>
+              </div>
+              <div id="voice-test-feedback" style="font-size: 0.88rem; color: #60a5fa; min-height: 24px; font-weight: 500;"></div>
+            </div>
+
+            <div class="interactive-box">
+              <h3 style="font-size: 1.1rem; color: #60a5fa;">Live Voice &amp; Shortcut HUD</h3>
+              <p style="font-size: 0.9rem; color: var(--text-muted);">
+                Press <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); color: #fff;">Alt</kbd> + <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); color: #fff;">A</kbd> to toggle the floating accessibility dock!
+              </p>
+              <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px dashed var(--border);">
+                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Try Saying:</span>
+                <ul style="font-size: 0.85rem; margin-top: 0.5rem; padding-left: 1.25rem; color: #cbd5e1; line-height: 1.6;">
+                  <li><strong>Media:</strong> "play" / "pause" / "volume up" / "mute"</li>
+                  <li><strong>Laptop View:</strong> "brightness up" / "dim screen" / "zoom in"</li>
+                  <li><strong>Navigation:</strong> "show numbers" (click badges) / "click 1"</li>
+                  <li><strong>Scrolling:</strong> "scroll down" / "scroll up" / "go to top"</li>
+                  <li><strong>Mic Control:</strong> "stop listening" / "turn off mic"</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Text Simplifier -->
+          <div id="panel-tab-sim" style="display: none;">
+            <div class="interactive-box" style="grid-column: 1 / -1;">
+              <h3 style="font-size: 1.1rem; color: #60a5fa;">🧠 Cognitive Text Simplifier & Read-Aloud</h3>
+              <p id="demo-sample-text" style="font-size: 1rem; line-height: 1.7; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
+                "The implementation of sophisticated cognitive simplification algorithms facilitates expeditious comprehension of labyrinthine conceptual frameworks."
+              </p>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <button class="btn btn-secondary" id="btn-demo-simplify" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  ✨ Simplify This Text
+                </button>
+                <button class="btn btn-secondary" id="btn-demo-speak" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  🔊 Read Aloud
+                </button>
+                <button class="btn btn-secondary" id="btn-demo-bionic" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  📖 Toggle Bionic Reading
+                </button>
+              </div>
+              <div id="demo-status" style="font-size: 0.88rem; color: var(--success); font-weight: 600; min-height: 22px;"></div>
+            </div>
+          </div>
+
+          <!-- Tab 3: High Contrast -->
+          <div id="panel-tab-contrast" style="display: none;">
+            <div class="interactive-box" style="grid-column: 1 / -1;">
+              <h3 style="font-size: 1.1rem; color: #60a5fa;">🎨 High-Contrast & Vision Themes</h3>
+              <p style="font-size: 0.95rem; color: var(--text-muted);">
+                Switch contrast modes instantly to make text and elements crisp and readable for users with low vision or photophobia.
+              </p>
+              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                <button class="btn btn-secondary" id="btn-theme-yellow" style="font-size: 0.85rem; padding: 0.55rem 1.1rem; background: #000; color: #ffff00; border: 1px solid #ffff00;">
+                  🟡 Yellow on Black
+                </button>
+                <button class="btn btn-secondary" id="btn-theme-inverted" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  🔄 Invert / High Contrast
+                </button>
+                <button class="btn btn-secondary" id="btn-theme-reset" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
+                  ↩ Reset Theme
+                </button>
+              </div>
+              <div id="contrast-status" style="font-size: 0.88rem; color: #60a5fa; font-weight: 600; min-height: 22px; margin-top: 0.25rem;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======= VOICE COMMANDS REFERENCE ======= -->
+    <section id="voice-commands" style="max-width: 860px; margin: 0 auto 4rem; padding: 0 2rem;">
+      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center;">🎙️ Voice Command Reference</h2>
+      <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
+        Enable Voice Navigation from the panel, then speak any of these commands.
+      </p>
+
+      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+
+        <!-- Navigation -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🧭 Navigation</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"show numbers"</code> — badge all links/buttons</li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"click 3"</code> — click badge #3</li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"click search"</code> — click by label</li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"hide numbers"</code> — remove badges</li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go back"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go forward"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"reload"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"refresh"</code></li>
+          </ul>
+        </div>
+
+        <!-- Scrolling -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">↕️ Scrolling</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"scroll down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"down"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"scroll up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"up"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go to top"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"top"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go to bottom"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"bottom"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"page down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"page up"</code></li>
+          </ul>
+        </div>
+
+        <!-- Media & Playback -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🎬 Media & Playback</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"play"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"play video"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"resume"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"pause"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"pause video"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"volume up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"volume down"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"mute"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"unmute"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fullscreen"</code></li>
+          </ul>
+        </div>
+
+        <!-- Screen & Zoom -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🖥️ Screen & Zoom</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"zoom in"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"zoom out"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"brightness up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"make brighter"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"brightness down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"dim screen"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"high contrast"</code> — toggle contrast</li>
+          </ul>
+        </div>
+
+        <!-- Reading & AI -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🧠 Reading & AI</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read page"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read aloud"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop reading"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"simplify text"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"plain text"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"describe image"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read chart"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"dyslexia font"</code> — toggle font</li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"captions"</code> — toggle captions</li>
+          </ul>
+        </div>
+
+        <!-- Mic & Accessibility -->
+        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
+          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🎤 Mic & Audits</h3>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop listening"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"turn off mic"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"audit page"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"wcag audit"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"auto fix"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fix issues"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"help"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"voice commands"</code></li>
+            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fill [field] with [value]"</code></li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="features-grid">
+      <div class="feature-card">
+        <span class="feature-icon">🎙️</span>
+        <h3 class="feature-title">Hands-Free Voice Control</h3>
+        <p class="feature-desc">Navigate any website using intuitive voice commands. Overlay numbered markers on all links and click elements hands-free.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">👁️</span>
+        <h3 class="feature-title">Gemini Vision VLM</h3>
+        <p class="feature-desc">Deep AI descriptions for charts, infographics, UI diagrams, and memes. Also operates in 100% offline heuristic mode.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🧠</span>
+        <h3 class="feature-title">Cognitive Text Simplifier</h3>
+        <p class="feature-desc">Adjustable reading levels (Elementary, Plain English, Executive Summary) paired with Lexend and OpenDyslexic typography.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">👀</span>
+        <h3 class="feature-title">Webcam Gaze &amp; Switch Scan</h3>
+        <p class="feature-desc">Private, 100% on-device gaze tracking via webcam dwell-click, plus automated keyboard switch scanning.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">🛡️</span>
+        <h3 class="feature-title">Automated WCAG 2.2 Auditor</h3>
+        <p class="feature-desc">Instantly inspect any webpage for contrast ratios, missing alt-tags, and unlabelled form controls, with one-click auto-fixes.</p>
+      </div>
+
+      <div class="feature-card">
+        <span class="feature-icon">💬</span>
+        <h3 class="feature-title">Live Captions &amp; Sound Labels</h3>
+        <p class="feature-desc">On-screen speech-to-text with multi-speaker detection and real-time auditory badges like [Music] and [Applause].</p>
+      </div>
+    </section>
+
+    <!-- Install Guide -->
+    <section id="install" style="max-width: 860px; margin: 0 auto 6rem; padding: 0 2rem; text-align: center;">
+      <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.75rem;">Get OmniAccess AI for Chrome</h2>
+      <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;">
+        Install on any computer in under a minute — no development experience required.
+      </p>
+
+      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
+        
+        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border);">
+          <div>
+            <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Download Extension Package</h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">Clean, production-ready build for Google Chrome, Brave, and Edge.</p>
+          </div>
+          <a href="omniaccess-ai-extension.zip" download="omniaccess-ai-extension.zip" class="btn btn-primary" style="font-size: 1rem; padding: 0.85rem 1.6rem; display: inline-flex; align-items: center; gap: 8px;">
+            <span>⬇️ Download Extension (.ZIP)</span>
+          </a>
+        </div>
+
+        <h4 style="font-size: 1.05rem; font-weight: 700; color: #60a5fa; margin-bottom: 1rem;">Simple 3-Step Setup for Any User:</h4>
+        <ol style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 1rem; color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
+          <li>
+            <strong style="color: #fff;">Download &amp; Extract:</strong> Download the <code style="color: #60a5fa; background: rgba(59,130,246,0.1); padding: 2px 6px; border-radius: 4px;">omniaccess-ai-extension.zip</code> file above and extract / unzip it to any folder on your computer.
+          </li>
+          <li>
+            <strong style="color: #fff;">Open Chrome Extensions:</strong> In Chrome (or Edge/Brave), navigate to <code style="color: #60a5fa; background: rgba(59,130,246,0.1); padding: 2px 6px; border-radius: 4px;">chrome://extensions</code> and switch on the <strong style="color: #fff;">Developer mode</strong> toggle in the top-right corner.
+          </li>
+          <li>
+            <strong style="color: #fff;">Load Extension:</strong> Click the <strong style="color: #fff;">"Load unpacked"</strong> button in the top-left corner and select the extracted folder. OmniAccess AI is now installed and ready to assist you on any website!
+          </li>
+        </ol>
+
+        <div style="margin-top: 2rem; background: rgba(59,130,246,0.08); border-left: 4px solid #3b82f6; border-radius: 8px; padding: 1rem 1.25rem; font-size: 0.88rem; color: #94a3b8;">
+          💡 <strong style="color: #fff;">Chrome Web Store Coming Soon:</strong> OmniAccess AI is currently in submission for the official Chrome Web Store. For now, the standalone unpacked ZIP above offers full access with zero restrictions.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer role="contentinfo">
+    <p>OmniAccess AI &mdash; Built with privacy-first on-device intelligence for Think AI TCET.</p>
+  </footer>
+
+  <script src="website-demo.js"></script>
+</body>
+</html>

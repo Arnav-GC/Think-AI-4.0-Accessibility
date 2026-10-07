@@ -1,0 +1,59 @@
+/**
+ * OmniAccess AI - Typography and Readability Styles
+ * Includes Dyslexia-Friendly Fonts, Bionic Reading Fixations, and Reading Rulers.
+ */
+
+/* Web-safe Google Fonts fallback for Lexend and Atkinson Hyperlegible */
+@import url('https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Lexend:wght@300;400;500;600;700&display=swap');
+
+/* Dyslexia Font Injections - Universal Selector */
+html[data-omni-font="Lexend"],
+html[data-omni-font="Lexend"] * {
+  font-family: 'Lexend', 'Comic Sans MS', sans-serif !important;
+}
+
+html[data-omni-font="Atkinson"],
+html[data-omni-font="Atkinson"] * {
+  font-family: 'Atkinson Hyperlegible', Arial, sans-serif !important;
+}
+
+html[data-omni-font="OpenDyslexic"],
+html[data-omni-font="OpenDyslexic"] *,
+html[data-omni-font="dyslexia"],
+html[data-omni-font="dyslexia"] * {
+  font-family: 'OpenDyslexic', 'Lexend', 'Comic Sans MS', cursive, sans-serif !important;
+}
+
+/* Enhanced Cognitive Text Spacing (WCAG 1.4.12 Text Spacing) */
+html[data-omni-spacing="true"] body,
+html[data-omni-spacing="true"] p,
+html[data-omni-spacing="true"] div,
+html[data-omni-spacing="true"] li {
+  line-height: 1.8 !important;
+  letter-spacing: 0.12em !important;
+  word-spacing: 0.16em !important;
+}
+
+/* Bionic Reading Fixation Highlighting */
+.omni-bionic-fix {
+  font-weight: 800 !important;
+  color: inherit !important;
+  display: inline !important;
+  text-shadow: 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+/* Reading Ruler Guide */
+#omni-reading-ruler {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 38px;
+  background: rgba(254, 240, 138, 0.28); /* warm yellow guide */
+  border-top: 2px solid #ca8a04;
+  border-bottom: 2px solid #ca8a04;
+  pointer-events: none;
+  z-index: 2147483640;
+  box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.45); /* shaded reading mask */
+  display: none;
+  transition: top 0.05s ease-out;
+}

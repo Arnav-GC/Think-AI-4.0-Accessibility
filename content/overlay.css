@@ -1,0 +1,366 @@
+/**
+ * OmniAccess AI - Injected Overlays & Interactive Accessibility Styles
+ * High contrast, Switch scanner rings, Gaze dwell indicators, Voice markers, Live Captions, and Dock.
+ */
+
+/* ==========================================================================
+   Screen Reader Only Utility (Visually hidden but announced)
+   ========================================================================== */
+.omni-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/* ==========================================================================
+   High Contrast Themes (WCAG 1.4.3 / 1.4.6)
+   ========================================================================== */
+html[data-omni-contrast="yellow-black"] {
+  filter: contrast(1.2) !important;
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+}
+html[data-omni-contrast="yellow-black"] body,
+html[data-omni-contrast="yellow-black"] main,
+html[data-omni-contrast="yellow-black"] article,
+html[data-omni-contrast="yellow-black"] section,
+html[data-omni-contrast="yellow-black"] nav,
+html[data-omni-contrast="yellow-black"] div,
+html[data-omni-contrast="yellow-black"] p,
+html[data-omni-contrast="yellow-black"] span,
+html[data-omni-contrast="yellow-black"] li,
+html[data-omni-contrast="yellow-black"] h1,
+html[data-omni-contrast="yellow-black"] h2,
+html[data-omni-contrast="yellow-black"] h3 {
+  background-color: #000000 !important;
+  color: #ffff00 !important;
+  border-color: #ffff00 !important;
+}
+html[data-omni-contrast="yellow-black"] a {
+  color: #00ffff !important;
+  text-decoration: underline !important;
+}
+html[data-omni-contrast="yellow-black"] button,
+html[data-omni-contrast="yellow-black"] input,
+html[data-omni-contrast="yellow-black"] select {
+  background-color: #111111 !important;
+  color: #ffffff !important;
+  border: 2px solid #ffff00 !important;
+}
+
+html[data-omni-contrast="white-black"] {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+html[data-omni-contrast="white-black"] body,
+html[data-omni-contrast="white-black"] div,
+html[data-omni-contrast="white-black"] p,
+html[data-omni-contrast="white-black"] span {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+html[data-omni-contrast="white-black"] a {
+  color: #93c5fd !important;
+}
+
+/* Large Cursor */
+html[data-omni-cursor="large"],
+html[data-omni-cursor="large"] * {
+  cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="%23facc15" stroke="%23000" stroke-width="1.5"><polygon points="3 3 3 20 8 15 13 22 16 20 11 13 19 13 3 3"/></svg>'), auto !important;
+}
+
+/* High-Visibility Accessible Focus Indicators (WCAG 2.4.7) */
+html[data-omni-focusrings="true"] a:focus-visible,
+html[data-omni-focusrings="true"] button:focus-visible,
+html[data-omni-focusrings="true"] input:focus-visible,
+html[data-omni-focusrings="true"] select:focus-visible,
+html[data-omni-focusrings="true"] textarea:focus-visible,
+html[data-omni-focusrings="true"] [tabindex]:focus-visible {
+  outline: 3px solid #3b82f6 !important;
+  outline-offset: 3px !important;
+  border-radius: 4px !important;
+}
+
+/* Touch & Click Target Expander (WCAG 2.5.5 / 2.5.8) */
+html[data-omni-largetargets="true"] button,
+html[data-omni-largetargets="true"] a,
+html[data-omni-largetargets="true"] input[type="button"],
+html[data-omni-largetargets="true"] input[type="submit"],
+html[data-omni-largetargets="true"] [role="button"] {
+  min-height: 48px !important;
+  min-width: 48px !important;
+  padding: 10px 14px !important;
+}
+
+/* ==========================================================================
+   Voice Navigation Markers (Numbered badges for "click 4" voice commands)
+   ========================================================================== */
+.omni-nav-marker {
+  position: absolute !important;
+  z-index: 2147483642 !important;
+  background-color: #1e40af !important; /* Rich Navy Blue */
+  color: #ffffff !important;
+  font-family: system-ui, -apple-system, sans-serif !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  padding: 2px 7px !important;
+  border-radius: 4px !important;
+  border: 2px solid #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45) !important;
+  pointer-events: none !important;
+  line-height: 1.2 !important;
+  transform: translateY(-50%) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  opacity: 0.96 !important;
+}
+
+/* Voice Recognition Live HUD */
+#omni-voice-hud {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2147483645;
+  background: rgba(15, 23, 42, 0.95);
+  color: #ffffff;
+  padding: 10px 22px;
+  border-radius: 9999px;
+  border: 2px solid #3b82f6;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  pointer-events: auto;
+  transition: all 0.2s ease-in-out;
+}
+
+#omni-voice-hud.listening .omni-mic-pulse {
+  animation: omni-pulse 1.4s infinite;
+}
+
+@keyframes omni-pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.35); opacity: 0.6; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* ==========================================================================
+   Switch Access Scanner Highlight Box
+   ========================================================================== */
+.omni-switch-scan-active {
+  outline: 5px solid #ec4899 !important; /* Hot Pink high-visibility */
+  outline-offset: 4px !important;
+  box-shadow: 0 0 0 8px #ffffff, 0 0 20px rgba(236, 72, 153, 0.9) !important;
+  transition: all 0.15s ease-out !important;
+}
+
+/* ==========================================================================
+   Gaze Tracker Dwell Indicator & Cursor
+   ========================================================================== */
+#omni-gaze-cursor {
+  position: fixed;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #10b981;
+  background: rgba(16, 185, 129, 0.3);
+  pointer-events: none;
+  z-index: 2147483646;
+  transform: translate(-50%, -50%);
+  display: none;
+  transition: width 0.1s, height 0.1s;
+}
+
+#omni-gaze-dwell-progress {
+  position: absolute;
+  top: -3px;
+  left: -3px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 3px solid #3b82f6;
+  clip-path: polygon(50% 50%, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
+}
+
+#omni-gaze-cam-preview {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  width: 130px;
+  height: 98px;
+  background: #000;
+  border-radius: 8px;
+  border: 2px solid #10b981;
+  overflow: hidden;
+  z-index: 2147483644;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+  display: none;
+}
+#omni-gaze-cam-preview video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scaleX(-1); /* mirror */
+}
+
+/* ==========================================================================
+   Live Captions Overlay Dialog
+   ========================================================================== */
+#omni-live-captions-hud {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(90vw, 760px);
+  background: rgba(10, 15, 30, 0.94);
+  color: #ffffff;
+  border: 2px solid #60a5fa;
+  border-radius: 12px;
+  padding: 14px 20px;
+  z-index: 2147483643;
+  font-family: system-ui, -apple-system, sans-serif;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.7);
+  display: none;
+  cursor: move;
+}
+
+.omni-caption-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #93c5fd;
+  margin-bottom: 8px;
+}
+
+.omni-caption-text {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  min-height: 28px;
+}
+
+.omni-sound-badge {
+  display: inline-block;
+  background: #3b82f6;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+.omni-speaker-badge {
+  display: inline-block;
+  background: #10b981;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+/* ==========================================================================
+   WCAG Audit Violation Rings & Highlighting
+   ========================================================================== */
+.omni-wcag-violation-target {
+  position: relative !important;
+  outline: 3px dashed #ef4444 !important; /* bright red */
+  outline-offset: 3px !important;
+}
+
+.omni-wcag-flag-badge {
+  position: absolute !important;
+  top: -12px !important;
+  right: -12px !important;
+  background: #dc2626 !important;
+  color: #ffffff !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  padding: 2px 6px !important;
+  border-radius: 9999px !important;
+  border: 1.5px solid #ffffff !important;
+  z-index: 2147483641 !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* ==========================================================================
+   Floating Accessible Dock (Keyboard toggleable Alt+A)
+   ========================================================================== */
+#omni-floating-dock {
+  position: fixed;
+  right: 18px;
+  /* Clamp so it never starts above 12px or below 12px from the bottom */
+  top: clamp(12px, 50%, calc(100vh - 12px));
+  transform: translateY(-50%);
+  /* Never taller than the viewport minus 24px margin */
+  max-height: calc(100vh - 24px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Hide scrollbar visually but keep it functional */
+  scrollbar-width: none;
+  background: #0f172a;
+  border: 2px solid #3b82f6;
+  border-radius: 16px;
+  padding: 10px;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+  font-family: system-ui, sans-serif;
+  transition: opacity 0.2s ease;
+}
+#omni-floating-dock::-webkit-scrollbar {
+  display: none;
+}
+
+.omni-dock-btn {
+  background: #1e293b;
+  color: #f8fafc;
+  border: 1.5px solid #475569;
+  border-radius: 12px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.omni-dock-btn:hover,
+.omni-dock-btn:focus-visible {
+  background: #2563eb;
+  border-color: #93c5fd;
+  outline: 3px solid #60a5fa;
+  transform: scale(1.08);
+}
+.omni-dock-btn.active {
+  background: #2563eb;
+  border-color: #bfdbfe;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
+}
+
+/* Read Aloud Synchronous Word Highlighting */
+.omni-read-highlight {
+  background-color: #fef08a !important;
+  color: #0f172a !important;
+  border-radius: 2px !important;
+  box-shadow: 0 0 0 2px #fef08a !important;
+}
