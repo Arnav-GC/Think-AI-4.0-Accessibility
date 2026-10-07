@@ -106,14 +106,19 @@ OmniAccess AI/
 
 ---
 
-## 🛠️ Installation (Developer Mode)
+## 🛠️ Installation & Live Demo
 
-1. Open Chrome → `chrome://extensions`
-2. Enable **Developer Mode** (top right toggle)
-3. Click **Load unpacked**
-4. Select this folder: `C:\Users\Arnav\Documents\Think  AI TCET`
-5. The extension icon appears in the Chrome toolbar
-6. Click the icon → Side Panel opens with all settings
+You can install the extension and test all features interactively via the official website:
+
+👉 **[Launch OmniAccess AI Website & Install Guide](https://arnav-gc.github.io/Think-AI-4.0-Accessibility/)**
+
+### Quick Install Steps:
+1. Visit the website above or download [`omniaccess-ai-extension.zip`](omniaccess-ai-extension.zip) from this repository.
+2. Unzip the downloaded file into a folder on your computer.
+3. Open Google Chrome and go to `chrome://extensions/`.
+4. Turn on **Developer mode** in the top right corner.
+5. Click **Load unpacked** and select the unzipped folder.
+6. Pin **OmniAccess AI** to your Chrome toolbar to begin!
 
 ---
 
