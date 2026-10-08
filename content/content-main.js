@@ -315,6 +315,35 @@
       window.OmniImageDescriber.updateSettings(aiSettings);
     }
 
+    // ── Start / stop Voice Nav based on settings ────────────────────────────────
+    if (window.OmniVoiceNav) {
+      if (settings.voiceEnabled && !window.OmniVoiceNav.isActive) {
+        window.OmniVoiceNav.start();
+      } else if (!settings.voiceEnabled && window.OmniVoiceNav.isActive) {
+        window.OmniVoiceNav.stop();
+      }
+    }
+
+    // ── Start / stop Read Aloud based on settings ───────────────────────────────
+    if (window.OmniReadAloud) {
+      // Update TTS settings first
+      window.OmniReadAloud.updateSettings({
+        ttsSpeed: settings.ttsSpeed || 1.0,
+        ttsPitch: settings.ttsPitch || 1.0,
+        ttsVoice: settings.ttsVoice || null
+      });
+      if (settings.readAloudEnabled && !window.OmniReadAloud.isReading) {
+        // Small delay to let the page finish any transitions before reading
+        setTimeout(() => {
+          if (currentSettings.readAloudEnabled && window.OmniReadAloud && !window.OmniReadAloud.isReading) {
+            window.OmniReadAloud.readPage();
+          }
+        }, 800);
+      } else if (!settings.readAloudEnabled && window.OmniReadAloud.isReading) {
+        window.OmniReadAloud.stop();
+      }
+    }
+
     // Update dock button active states to reflect current settings.
     syncDockButtonStates(settings);
   }
@@ -467,17 +496,34 @@
    * @param {HTMLButtonElement} btn
    */
   function handleDockButtonClick(key, btn) {
+    // Visual alert + haptic on every button press
+    flashBorder('#3b82f6', 350);
+    hapticPulse([30]);
+
     switch (key) {
       case 'voice': {
         const nowEnabled = !currentSettings.voiceEnabled;
         currentSettings.voiceEnabled = nowEnabled;
         btn.setAttribute('aria-pressed', String(nowEnabled));
         setButtonActive(btn, nowEnabled);
-        nowEnabled ? chime.toggle_on() : chime.toggle_off();
+        // ⚠️ Do NOT play chime here — OmniVoiceNav plays its own listen/deactivate tone.
+        // Playing both simultaneously causes the "random noise" the user hears.
         chrome.runtime.sendMessage({ type: 'SAVE_SETTINGS', settings: { voiceEnabled: nowEnabled } });
-        if (window.OmniVoiceNav) {
-          if (nowEnabled) window.OmniVoiceNav.start();
-          else window.OmniVoiceNav.stop();
+        if (nowEnabled) {
+          // Stop any other SpeechRecognition instances first to avoid mic conflicts
+          // (Chrome only allows one recognition instance per tab at a time)
+          stopSoundLabelDetection();
+          if (window.OmniLiveCaptions && window.OmniLiveCaptions.isActive) {
+            window.OmniLiveCaptions.stop();
+            currentSettings.captionsEnabled = false;
+            const capBtn = document.getElementById(`${PREFIX}-dock-btn-captions`);
+            if (capBtn) { capBtn.setAttribute('aria-pressed', 'false'); setButtonActive(capBtn, false); }
+          }
+          if (window.OmniVoiceNav) window.OmniVoiceNav.start();
+        } else {
+          if (window.OmniVoiceNav) window.OmniVoiceNav.stop();
+          // Restore sound labels detection if it was on
+          if (currentSettings.soundLabelsEnabled) startSoundLabelDetection();
         }
         break;
       }
@@ -684,6 +730,18 @@
     btn.setAttribute('aria-pressed', String(enabled));
     setButtonActive(btn, enabled);
     chrome.runtime.sendMessage({ type: 'SAVE_SETTINGS', settings: { captionsEnabled: enabled } });
+
+    if (enabled) {
+      // Stop competing SpeechRecognition instances — Chrome allows only one per tab
+      if (window.OmniVoiceNav && window.OmniVoiceNav.isActive) {
+        window.OmniVoiceNav.stop();
+        currentSettings.voiceEnabled = false;
+        const vBtn = document.getElementById(`${PREFIX}-dock-btn-voice`);
+        if (vBtn) { vBtn.setAttribute('aria-pressed', 'false'); setButtonActive(vBtn, false); }
+      }
+      stopSoundLabelDetection();
+    }
+
     if (window.OmniLiveCaptions) {
       if (enabled) window.OmniLiveCaptions.start();
       else window.OmniLiveCaptions.stop();
@@ -1581,6 +1639,105 @@
     }, 3500);
   }
 
+  /* ─── Visual Alert — flash screen border ──────────────────────────────────── */
+  function flashBorder(color = '#3b82f6', durationMs = 500) {
+    if (!currentSettings.visualAlertsEnabled) return;
+    const root = document.documentElement;
+    const prev = root.style.outline;
+    root.style.outline = `4px solid ${color}`;
+    root.style.outlineOffset = '-4px';
+    setTimeout(() => {
+      root.style.outline = prev || '';
+      root.style.outlineOffset = '';
+    }, durationMs);
+  }
+
+  /* ─── Haptic pulse ─────────────────────────────────────────────────────────── */
+  function hapticPulse(pattern = [40]) {
+    if (currentSettings.hapticEnabled && 'vibrate' in navigator) {
+      navigator.vibrate(pattern);
+    }
+  }
+
+  /* ─── Sound Label Detection ────────────────────────────────────────────────── */
+  let _soundLabelRecognition = null;
+  const SOUND_PATTERNS = [
+    { re: /\bmusic\b/i,             label: '🎵 Music',     color: '#7c3aed' },
+    { re: /\blaugh(ter|ing)?\b/i,   label: '😄 Laughter',  color: '#d97706' },
+    { re: /\bapplause\b/i,          label: '👏 Applause',   color: '#059669' },
+    { re: /\bsilence\b/i,           label: '🤫 Silence',    color: '#475569' },
+    { re: /\balarm\b/i,             label: '🚨 Alarm',      color: '#dc2626' },
+    { re: /\bdoor(bell)?\b/i,       label: '🔔 Doorbell',   color: '#ca8a04' },
+    { re: /\bknock(ing)?\b/i,       label: '🚪 Knocking',   color: '#92400e' },
+    { re: /\bphone\b/i,             label: '📱 Phone',      color: '#0284c7' },
+  ];
+
+  function showSoundBadge(label, color) {
+    const existing = document.getElementById('omni-sound-badge');
+    if (existing) existing.remove();
+    const badge = document.createElement('div');
+    badge.id = 'omni-sound-badge';
+    badge.setAttribute('role', 'status');
+    badge.setAttribute('aria-live', 'assertive');
+    badge.style.cssText = [
+      'position:fixed', 'top:80px', 'left:50%',
+      'transform:translateX(-50%)',
+      `background:${color}`, 'color:#fff',
+      'padding:8px 20px', 'border-radius:24px',
+      'font-size:1rem', 'font-weight:700',
+      'z-index:2147483647',
+      'box-shadow:0 4px 16px rgba(0,0,0,0.4)',
+      'animation:omni-toast-in 0.3s ease',
+      'pointer-events:none'
+    ].join(';');
+    badge.textContent = `[ ${label} ]`;
+    document.body.appendChild(badge);
+    setTimeout(() => {
+      badge.style.opacity = '0';
+      badge.style.transition = 'opacity 0.5s';
+      setTimeout(() => badge.remove(), 500);
+    }, 3000);
+  }
+
+  function startSoundLabelDetection() {
+    if (_soundLabelRecognition) return; // already running
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SR) return;
+    try {
+      _soundLabelRecognition = new SR();
+      _soundLabelRecognition.continuous = true;
+      _soundLabelRecognition.interimResults = true;
+      _soundLabelRecognition.lang = navigator.language || 'en-US';
+      _soundLabelRecognition.onresult = (event) => {
+        if (!currentSettings.soundLabelsEnabled) return;
+        let text = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          text += event.results[i][0].transcript;
+        }
+        for (const { re, label, color } of SOUND_PATTERNS) {
+          if (re.test(text)) {
+            showSoundBadge(label, color);
+            break;
+          }
+        }
+      };
+      _soundLabelRecognition.onerror = () => {};
+      _soundLabelRecognition.onend = () => {
+        if (currentSettings.soundLabelsEnabled && _soundLabelRecognition) {
+          try { _soundLabelRecognition.start(); } catch (_) {}
+        }
+      };
+      _soundLabelRecognition.start();
+    } catch (_) {}
+  }
+
+  function stopSoundLabelDetection() {
+    if (_soundLabelRecognition) {
+      try { _soundLabelRecognition.stop(); } catch (_) {}
+      _soundLabelRecognition = null;
+    }
+  }
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || !message.type) return;
 
@@ -1634,9 +1791,18 @@
       (async () => {
         try {
           if (window.OmniTextSimplifier) {
-            window.OmniTextSimplifier.updateSettings({ simplifyLevel: message.level });
-            await window.OmniTextSimplifier.simplifyPage();
-            sendResponse({ success: true });
+            window.OmniTextSimplifier.updateSettings({
+              simplifyLevel: message.level,
+              aiProvider: message.provider,
+              geminiApiKey: message.provider !== 'grok' ? message.apiKey : undefined,
+              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined
+            });
+            const result = await window.OmniTextSimplifier.simplifyPage({
+              apiKey: message.apiKey,
+              provider: message.provider,
+              level: message.level
+            });
+            sendResponse({ success: true, count: result?.count ?? 0, restored: result?.restored ?? false });
           } else {
             await triggerSimplify();
             sendResponse({ success: true });
@@ -1653,7 +1819,16 @@
       (async () => {
         try {
           if (window.OmniImageDescriber) {
-            const count = await window.OmniImageDescriber.describeAllImages();
+            window.OmniImageDescriber.updateSettings({
+              aiProvider: message.provider,
+              geminiApiKey: message.provider !== 'grok' ? message.apiKey : undefined,
+              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined
+            });
+            const result = await window.OmniImageDescriber.describeAllImages({
+              apiKey: message.apiKey,
+              provider: message.provider
+            });
+            const count = typeof result === 'object' ? result.count : result;
             sendResponse({ success: true, count });
           } else {
             sendResponse({ success: true, count: 0 });
@@ -1879,14 +2054,41 @@
       return true;
     }
 
-    // Sound Labels toggle
+    // Sound Labels — show floating badge overlay on detection
     if (message.type === 'SET_SOUND_LABELS') {
       currentSettings.soundLabelsEnabled = message.enabled;
+      if (message.enabled) {
+        showToast('Sound Labels enabled — labels will appear when ambient sounds are detected.', 'info', 3000);
+        startSoundLabelDetection();
+      } else {
+        stopSoundLabelDetection();
+      }
       sendResponse({ success: true });
       return true;
     }
 
-    // Caption Size
+    // Visual Alerts — flash border on every chime/event when enabled
+    if (message.type === 'SET_VISUAL_ALERTS') {
+      currentSettings.visualAlertsEnabled = message.enabled;
+      if (message.enabled) {
+        flashBorder('#3b82f6'); // demo flash to confirm it's on
+        showToast('Visual Alerts on — screen border will flash instead of sounds.', 'info', 3000);
+      }
+      sendResponse({ success: true });
+      return true;
+    }
+
+    // Haptic Feedback — vibrate on key events
+    if (message.type === 'SET_HAPTIC') {
+      currentSettings.hapticEnabled = message.enabled;
+      if (message.enabled && 'vibrate' in navigator) {
+        navigator.vibrate([50, 30, 50]); // confirmation pattern
+        showToast('Haptic Feedback on — device will vibrate on key events.', 'info', 3000);
+      }
+      sendResponse({ success: true });
+      return true;
+    }
+
     if (message.type === 'SET_CAPTION_SIZE') {
       currentSettings.captionSize = message.size;
       if (window.OmniLiveCaptions) {
@@ -1920,19 +2122,58 @@
       return true;
     }
 
-    // TTS settings
+    // ── Read Aloud ─────────────────────────────────────────────────────────────
+    if (message.type === 'SET_READ_ALOUD') {
+      currentSettings.readAloudEnabled = message.enabled;
+      if (message.enabled) {
+        if (window.OmniReadAloud) {
+          window.OmniReadAloud.readPage();
+        } else {
+          // Fallback: use basic SpeechSynthesis
+          if (window.speechSynthesis.speaking) { window.speechSynthesis.cancel(); }
+          const text = document.body.innerText.slice(0, 8000).trim();
+          if (text) {
+            const utt = new SpeechSynthesisUtterance(text);
+            utt.rate  = currentSettings.ttsSpeed  || 1.0;
+            utt.pitch = currentSettings.ttsPitch   || 1.0;
+            window.speechSynthesis.speak(utt);
+          }
+        }
+      } else {
+        if (window.OmniReadAloud) {
+          window.OmniReadAloud.stop();
+        } else if (window.speechSynthesis.speaking) {
+          window.speechSynthesis.cancel();
+        }
+      }
+      sendResponse({ success: true });
+      return true;
+    }
+
+    // TTS settings — save AND push to the ReadAloud engine
     if (message.type === 'SET_TTS_SPEED') {
       currentSettings.ttsSpeed = message.value;
+      if (window.OmniReadAloud) {
+        window.OmniReadAloud.updateSettings({ readAloudSpeed: message.value, ttsSpeed: message.value });
+        if (window.OmniReadAloud.utterance) window.OmniReadAloud.utterance.rate = message.value;
+      }
       sendResponse({ success: true });
       return true;
     }
     if (message.type === 'SET_TTS_PITCH') {
       currentSettings.ttsPitch = message.value;
+      if (window.OmniReadAloud) {
+        window.OmniReadAloud.updateSettings({ readAloudPitch: message.value, ttsPitch: message.value });
+        if (window.OmniReadAloud.utterance) window.OmniReadAloud.utterance.pitch = message.value;
+      }
       sendResponse({ success: true });
       return true;
     }
     if (message.type === 'SET_TTS_VOICE') {
       currentSettings.ttsVoice = message.voice;
+      if (window.OmniReadAloud) {
+        window.OmniReadAloud.updateSettings({ readAloudVoice: message.voice, ttsVoice: message.voice });
+      }
       sendResponse({ success: true });
       return true;
     }

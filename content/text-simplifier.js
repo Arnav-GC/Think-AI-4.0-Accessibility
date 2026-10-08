@@ -162,20 +162,25 @@
     /**
      * Simplify all paragraph/article text on the page
      */
-    async simplifyPage({ onProgress } = {}) {
+    async simplifyPage({ onProgress, apiKey, provider, level } = {}) {
+      if (apiKey) this.apiKey = apiKey;
+      if (provider) this.provider = provider;
+      if (level) this.level = level;
+
       if (this.isSimplified) {
         this.restorePage();
-        return;
+        return { restored: true, count: 0 };
       }
 
       const targets = Array.from(document.querySelectorAll(
-        'p, li, td, article, section > div, [role="article"] > div'
+        'p, li, td, article, section > div, [role="article"] > div, blockquote, dd'
       )).filter(el => {
-        if (el.closest('#omni-floating-dock, #omni-voice-hud, #omni-live-captions-hud')) return false;
+        if (el.closest('#omni-floating-dock, #omni-voice-hud, #omni-live-captions-hud, #omni-audit-panel')) return false;
         const text = el.innerText || el.textContent || '';
-        return text.trim().length > 80; // skip very short elements
+        return text.trim().length > 30; // process elements with meaningful content
       });
 
+      let modifiedCount = 0;
       let done = 0;
       for (const el of targets) {
         const originalText = (el.innerText || el.textContent || '').trim();
@@ -184,8 +189,8 @@
         try {
           let simplified = null;
 
-          // Try Gemini first for meaningful paragraphs
-          if (this.apiKey && originalText.length > 100) {
+          // Try AI first if API key is provided and paragraph is substantial
+          if (this.apiKey && originalText.length > 50) {
             simplified = await callAISimplify(originalText, this.level, this.apiKey, this.provider);
           }
 
@@ -211,6 +216,7 @@
             el.setAttribute('data-omni-simplified', 'true');
             el.style.setProperty('border-left', '3px solid #3b82f6', 'important');
             el.style.setProperty('padding-left', '8px', 'important');
+            modifiedCount++;
           }
         } catch (_) {}
 
@@ -219,6 +225,7 @@
       }
 
       this.isSimplified = true;
+      return { restored: false, count: modifiedCount, total: targets.length };
     }
 
     /**

@@ -192,8 +192,11 @@
     /**
      * Describe all images on the page that lack alt text
      */
-    async describeAllImages({ onProgress } = {}) {
-      if (this.processing) return;
+    async describeAllImages({ onProgress, apiKey, provider } = {}) {
+      if (apiKey) this.apiKey = apiKey;
+      if (provider) this.provider = provider;
+
+      if (this.processing) return { count: 0, total: 0 };
       this.processing = true;
 
       const images = Array.from(document.querySelectorAll('img')).filter(img => {
@@ -203,34 +206,36 @@
         const role = img.getAttribute('role');
         if (role === 'presentation' || role === 'none') return false;
 
-        // Skip data URIs — they're usually inline icons or placeholders
-        if ((img.src || '').startsWith('data:')) return false;
+        // Skip data URIs — they're usually tiny inline icons or placeholders
+        if ((img.src || '').startsWith('data:') && (img.naturalWidth || 0) < 60) return false;
 
         // Skip invisible images
         const style = window.getComputedStyle(img);
         if (style.display === 'none' || style.visibility === 'hidden' || style.opacity === '0') return false;
 
-        // Skip tiny images — icons, avatars, 1x1 tracking pixels (min 48×48)
+        // Skip tiny images — icons, 1x1 tracking pixels (min 24x24)
         const w = img.naturalWidth  || img.offsetWidth  || parseInt(img.getAttribute('width')  || '0');
         const h = img.naturalHeight || img.offsetHeight || parseInt(img.getAttribute('height') || '0');
-        if (w > 0 && w < 48) return false;
-        if (h > 0 && h < 48) return false;
+        if (w > 0 && w < 24) return false;
+        if (h > 0 && h < 24) return false;
 
-        // Only process images with missing or empty alt
+        // Process images with missing or empty alt, or images whose alt is just filename / unhelpful
         const alt = img.getAttribute('alt');
-        return alt === null || alt.trim() === '';
+        return alt === null || alt.trim() === '' || looksLikeHash(alt.trim());
       });
 
+      let describedCount = 0;
       let done = 0;
       for (const img of images) {
         try {
           const desc = await this.describeSingleImage(img);
-          // Only inject badge if we got a real, non-null description
-          if (desc && desc.length > 5) {
+          // Only inject badge if we got a real description
+          if (desc && desc.length > 3) {
             img.setAttribute('alt', desc);
             img.setAttribute('aria-label', desc);
             this.described.add(img);
             this.injectDescriptionBadge(img, desc);
+            describedCount++;
           }
         } catch (_) {}
         done++;
@@ -238,7 +243,7 @@
       }
 
       this.processing = false;
-      return images.length;
+      return { count: describedCount, total: images.length };
     }
 
     /**

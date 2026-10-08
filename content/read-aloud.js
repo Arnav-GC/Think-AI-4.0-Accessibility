@@ -28,12 +28,16 @@
     /**
      * Update voice/speed/pitch from settings object
      */
-    updateSettings({ readAloudSpeed, readAloudPitch, readAloudVoice } = {}) {
-      if (readAloudSpeed !== undefined) this.settings.speed = readAloudSpeed;
-      if (readAloudPitch !== undefined) this.settings.pitch = readAloudPitch;
-      if (readAloudVoice !== undefined) {
+    updateSettings(opts = {}) {
+      const speed = opts.readAloudSpeed ?? opts.ttsSpeed;
+      const pitch = opts.readAloudPitch ?? opts.ttsPitch;
+      const voice = opts.readAloudVoice ?? opts.ttsVoice;
+
+      if (speed  !== undefined) this.settings.speed = parseFloat(speed)  || 1.0;
+      if (pitch  !== undefined) this.settings.pitch = parseFloat(pitch)  || 1.0;
+      if (voice  !== undefined) {
         const voices = this.synth.getVoices();
-        this.settings.voice = voices.find(v => v.name === readAloudVoice) || null;
+        this.settings.voice = voices.find(v => v.name === voice) || null;
       }
     }
 

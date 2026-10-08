@@ -5,10 +5,16 @@ Thumbs.db
 .vscode/
 .idea/
 
-# Environment / Keys
+# Environment / Keys — never commit secrets!
 .env
 .env.local
 *.pem
+secrets.js
+config.local.js
+
+# Extension build artifacts — don't push zip/crx bundles
+*.zip
+*.crx
 
 # Node / Dependencies (if any added in future)
 node_modules/

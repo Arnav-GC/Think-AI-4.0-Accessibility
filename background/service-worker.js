@@ -232,10 +232,27 @@ async function switchProfile(profileId) {
       notificationsEnabled: true
     },
     blind_screen_reader: {
-      voiceEnabled: true,
-      readAloudEnabled: true,
-      audioChimesEnabled: true,
-      notificationsEnabled: true
+      // Core screen reader features
+      voiceEnabled:         true,
+      readAloudEnabled:     true,
+      audioChimesEnabled:   true,
+      soundLabelsEnabled:   true,
+      notificationsEnabled: true,
+      // Navigation aids
+      focusRingsEnabled:    true,
+      largeTargetsEnabled:  true,
+      cursorEnabled:        true,
+      skipLinksEnabled:     true,
+      // Visual — high contrast helps low-vision users
+      contrastTheme:        'white-black',
+      // Simplify page content for easier listening
+      simplifyEnabled:      true,
+      simplificationLevel:  'easy',
+      // TTS defaults
+      ttsSpeed: 1.1,
+      ttsPitch: 1.0,
+      // Captions off by default (uses same mic as voice nav)
+      captionsEnabled: false
     },
     cognitive: {
       fontEnabled: true,

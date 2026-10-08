@@ -129,18 +129,22 @@ async function sendToTab(message) {
     const tab = await getActiveTab();
     if (!tab || !tab.id) {
       console.warn("[OmniAccess] No active tab found.");
-      return null;
+      return { success: false, error: "No active webpage tab found. Please click into a tab." };
     }
 
-    // Chrome extensions cannot send messages to chrome://, edge://, or extension pages
+    // Chrome extensions cannot send messages or inject scripts to chrome://, edge://, chrome-extension://, or Web Store
     if (tab.url && (
       tab.url.startsWith('chrome://') ||
       tab.url.startsWith('edge://') ||
       tab.url.startsWith('chrome-extension://') ||
-      tab.url.includes('chromewebstore')
+      tab.url.includes('chromewebstore') ||
+      tab.url.startsWith('about:')
     )) {
-      console.warn('[OmniAccess] Cannot inject into this page type:', tab.url);
-      return null;
+      console.warn('[OmniAccess] Cannot interact with browser system page:', tab.url);
+      return {
+        success: false,
+        error: "Cannot run on browser system pages. Please switch to a regular website (e.g. Wikipedia or any http/https site)."
+      };
     }
 
     try {
@@ -149,7 +153,6 @@ async function sendToTab(message) {
     } catch (inner) {
       console.log("[OmniAccess] Script not ready in tab, attempting on-demand injection...");
       try {
-        // Automatically inject scripts into the tab so user doesn't even need to refresh
         await chrome.scripting.executeScript({
           target: { tabId: tab.id },
           files: [
@@ -164,18 +167,19 @@ async function sendToTab(message) {
             "content/content-main.js"
           ]
         });
-        // Retry message after brief delay
-        await new Promise(r => setTimeout(r, 100));
+        await new Promise(r => setTimeout(r, 120));
         return await chrome.tabs.sendMessage(tab.id, message);
       } catch (injectErr) {
         console.warn("[OmniAccess] Dynamic injection failed:", injectErr.message);
-        alert("Please refresh this webpage once (F5) so OmniAccess AI can connect to it!");
-        return null;
+        return {
+          success: false,
+          error: "Please refresh this webpage once (F5) so OmniAccess AI can connect to it."
+        };
       }
     }
   } catch (err) {
     console.error("[OmniAccess] sendToTab fatal error:", err);
-    return null;
+    return { success: false, error: err.message || "Communication failed." };
   }
 }
 
@@ -922,13 +926,29 @@ function bindAiTabControls() {
       showStatus(simplifyStatus, "Simplifying page…", "", 0);
       simplifyBtn.disabled = true;
 
-      const response = await sendToTab({ type: "SIMPLIFY_PAGE", level });
+      // Get latest settings to ensure content script receives current API key
+      const settings = await getSettings();
+      const provider = settings.aiProvider || "gemini";
+      const apiKey = provider === "grok" ? (settings.grokApiKey || "") : (settings.geminiApiKey || "");
+
+      const response = await sendToTab({
+        type: "SIMPLIFY_PAGE",
+        level,
+        apiKey,
+        provider
+      });
 
       simplifyBtn.disabled = false;
       if (response && response.success) {
-        showStatus(simplifyStatus, "✓ Page simplified.", "success");
+        if (response.count === 0) {
+          showStatus(simplifyStatus, "ℹ No text blocks found to simplify on this page.", "warning", 5000);
+        } else {
+          const countInfo = response.count ? ` (${response.count} section${response.count > 1 ? 's' : ''})` : "";
+          showStatus(simplifyStatus, `✓ Page simplified${countInfo}.`, "success", 4000);
+        }
       } else {
-        showStatus(simplifyStatus, "✗ Could not simplify page.", "error");
+        const errorMsg = response?.error || "Could not simplify page.";
+        showStatus(simplifyStatus, `✗ ${errorMsg}`, "error", 6000);
       }
     });
   }
@@ -939,17 +959,31 @@ function bindAiTabControls() {
 
   if (describeBtn) {
     describeBtn.addEventListener("click", async () => {
-      showStatus(imagesStatus, "Generating descriptions…", "", 0);
+      showStatus(imagesStatus, "Scanning & describing images…", "", 0);
       describeBtn.disabled = true;
 
-      const response = await sendToTab({ type: "DESCRIBE_IMAGES" });
+      // Get latest settings to ensure content script receives current API key
+      const settings = await getSettings();
+      const provider = settings.aiProvider || "gemini";
+      const apiKey = provider === "grok" ? (settings.grokApiKey || "") : (settings.geminiApiKey || "");
+
+      const response = await sendToTab({
+        type: "DESCRIBE_IMAGES",
+        apiKey,
+        provider
+      });
 
       describeBtn.disabled = false;
       if (response && response.success) {
-        const count = response.count ?? "some";
-        showStatus(imagesStatus, `✓ Described ${count} image(s).`, "success");
+        const count = response.count ?? 0;
+        if (count === 0) {
+          showStatus(imagesStatus, "ℹ All images already have descriptions.", "success", 4000);
+        } else {
+          showStatus(imagesStatus, `✓ Described ${count} image(s).`, "success", 4000);
+        }
       } else {
-        showStatus(imagesStatus, "✗ Could not describe images.", "error");
+        const errorMsg = response?.error || "Could not describe images.";
+        showStatus(imagesStatus, `✗ ${errorMsg}`, "error", 6000);
       }
     });
   }
