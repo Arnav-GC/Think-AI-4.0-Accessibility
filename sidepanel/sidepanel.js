@@ -37,6 +37,9 @@ const panelChime = (() => {
 
   function tone(f1, f2, dur = 0.25, type = 'sine', vol = 0.35) {
     try {
+      const chimesToggle = document.getElementById("audio-chimes-toggle");
+      if (chimesToggle && !chimesToggle.checked) return; // Muted unless user explicitly enabled audio chimes
+
       const c = getContext();
       if (!c) return;
 
@@ -351,11 +354,10 @@ async function loadAndPopulateSettings() {
       initialMicLabel.innerHTML = `<span id="mic-status-dot" style="width: 8px; height: 8px; border-radius: 50%; background: #64748b;"></span> Mic Idle / Off`;
     }
   }
-  setRadio("listening-mode", s.listeningMode || "continuous");
   setCheckbox("gaze-toggle", s.gazeEnabled);
   setSlider("dwell-time-slider", "dwell-time-value", s.dwellTime ?? 1.0, "s");
-  setCheckbox("switch-toggle", s.switchEnabled);
-  setSlider("scan-speed-slider", "scan-speed-value", s.scanSpeed ?? 2.0, "s");
+  setCheckbox("switch-toggle", s.switchEnabled || s.switchAccessEnabled || false);
+  setSlider("scan-speed-slider", "scan-speed-value", s.scanSpeed ?? (s.switchScanSpeed ? s.switchScanSpeed / 1000 : 2.0), "s");
   setValue("scan-mode-select", s.scanMode || "auto");
   setValue("switch-key-select", s.switchKey || "Space");
 
@@ -561,15 +563,6 @@ function bindInputTabControls() {
     });
   }
 
-  const listeningRadios = document.querySelectorAll("input[name='listening-mode']");
-  listeningRadios.forEach((radio) => {
-    radio.addEventListener("change", async () => {
-      panelChime.click();
-      await saveSetting("listeningMode", radio.value);
-      await sendToTab({ type: "SET_LISTENING_MODE", mode: radio.value });
-    });
-  });
-
   // ---- Gaze / Webcam ----
   const gazeToggle = document.getElementById("gaze-toggle");
   if (gazeToggle) {
@@ -587,16 +580,32 @@ function bindInputTabControls() {
 
   // ---- Switch Access ----
   const switchToggle = document.getElementById("switch-toggle");
+  const scanSpeedSlider = document.getElementById("scan-speed-slider");
+  const scanModeSelect = document.getElementById("scan-mode-select");
+  const switchKeySelect = document.getElementById("switch-key-select");
+
   if (switchToggle) {
     switchToggle.addEventListener("change", async () => {
       const enabled = switchToggle.checked;
       enabled ? panelChime.toggle_on() : panelChime.toggle_off();
       await saveSetting("switchEnabled", enabled);
-      await sendToTab({ type: enabled ? "START_SWITCH_ACCESS" : "STOP_SWITCH_ACCESS" });
+      await saveSetting("switchAccessEnabled", enabled);
+
+      const speed = scanSpeedSlider ? parseFloat(scanSpeedSlider.value) : 2.0;
+      const mode = scanModeSelect ? scanModeSelect.value : "auto";
+      const key = switchKeySelect ? switchKeySelect.value : "Space";
+
+      await sendToTab({
+        type: enabled ? "START_SWITCH_ACCESS" : "STOP_SWITCH_ACCESS",
+        scanSpeed: speed,
+        scanMode: mode,
+        switchKey: key
+      });
     });
   }
 
   bindSlider("scan-speed-slider", "scan-speed-value", "scanSpeed", "s", async (val) => {
+    await saveSetting("switchScanSpeed", val * 1000);
     await sendToTab({ type: "SET_SCAN_SPEED", value: val });
   });
 
@@ -630,8 +639,31 @@ function bindOutputTabControls() {
 
   // Read Aloud
   bindToggle("read-aloud-toggle", "readAloudEnabled", async (val) => {
-    await sendToTab({ type: "SET_READ_ALOUD", enabled: val });
+    // When toggle is turned OFF, stop any active speech
+    if (!val) {
+      await sendToTab({ type: "SET_READ_ALOUD", enabled: false });
+    }
   });
+
+  const btnStartRead = document.getElementById("btn-start-read-aloud");
+  const btnStopRead = document.getElementById("btn-stop-read-aloud");
+  if (btnStartRead) {
+    btnStartRead.addEventListener("click", async () => {
+      panelChime.toggle_on();
+      const toggle = document.getElementById("read-aloud-toggle");
+      if (toggle && !toggle.checked) {
+        toggle.checked = true;
+        await saveSetting("readAloudEnabled", true);
+      }
+      await sendToTab({ type: "SET_READ_ALOUD", enabled: true });
+    });
+  }
+  if (btnStopRead) {
+    btnStopRead.addEventListener("click", async () => {
+      panelChime.toggle_off();
+      await sendToTab({ type: "SET_READ_ALOUD", enabled: false });
+    });
+  }
 
   bindSlider("tts-speed-slider", "tts-speed-value", "ttsSpeed", "×", async (val) => {
     await sendToTab({ type: "SET_TTS_SPEED", value: val });
@@ -719,6 +751,14 @@ function bindVisualTabControls() {
   // Zoom
   bindSlider("zoom-slider", "zoom-value", "zoomLevel", "%", async (val) => {
     await sendToTab({ type: "SET_ZOOM", level: val });
+  });
+
+  // Blue Light Filter
+  bindToggle("bluelight-toggle", "blueLightFilterEnabled", async (val) => {
+    await sendToTab({ type: "SET_BLUELIGHT_FILTER", enabled: val });
+  });
+  bindSlider("bluelight-slider", "bluelight-value", "blueLightIntensity", "%", async (val) => {
+    await sendToTab({ type: "SET_BLUELIGHT_INTENSITY", intensity: val });
   });
 
   // Dyslexia Font

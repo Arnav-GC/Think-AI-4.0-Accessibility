@@ -89,18 +89,36 @@
 
   // ─── Canvas helper to convert <img> to base64 data URL ─────────────────────
 
-  function imgToDataUrl(imgEl) {
+  async function imgToDataUrl(imgEl) {
+    // 1. Try canvas (works for same-origin and CORS-enabled images)
     try {
       const canvas = document.createElement('canvas');
       canvas.width = imgEl.naturalWidth || imgEl.width || 100;
       canvas.height = imgEl.naturalHeight || imgEl.height || 100;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(imgEl, 0, 0, canvas.width, canvas.height);
-      return canvas.toDataURL('image/jpeg', 0.8);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+      if (dataUrl && dataUrl.length > 100) return dataUrl;
     } catch (_) {
-      // Cross-origin images throw SecurityError
-      return null;
+      // Cross-origin SecurityError — fall through to background fetch
     }
+
+    // 2. Fallback: fetch via background service worker (no CORS restrictions)
+    const imgSrc = imgEl.src || imgEl.currentSrc;
+    if (!imgSrc || imgSrc.startsWith('data:')) return null;
+    try {
+      const response = await new Promise((resolve) => {
+        chrome.runtime.sendMessage(
+          { type: 'FETCH_IMAGE_AS_DATA_URL', url: imgSrc },
+          (resp) => resolve(resp)
+        );
+      });
+      if (response && response.success && response.dataUrl) {
+        return response.dataUrl;
+      }
+    } catch (_) {}
+
+    return null;
   }
 
   // ─── Offline heuristic description ──────────────────────────────────────────
@@ -271,7 +289,7 @@
 
       // Try AI description
       if (this.apiKey) {
-        const dataUrl = imgToDataUrl(imgEl);
+        const dataUrl = await imgToDataUrl(imgEl);
         if (dataUrl) {
           try {
             const aiDesc = await callAIVision(dataUrl, promptInstruction, this.apiKey, this.provider);
@@ -352,13 +370,33 @@
         const handler = async (e) => {
           e.preventDefault();
           e.stopPropagation();
+          // Show visible loading overlay
           img.setAttribute('aria-busy', 'true');
+          img.style.outline = '3px solid #3b82f6';
+          const loadingDiv = document.createElement('div');
+          loadingDiv.className = 'omni-img-loading';
+          loadingDiv.style.cssText = 'position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;z-index:999;border-radius:4px;';
+          loadingDiv.textContent = '🔍 Describing…';
+          img.style.position = img.style.position || 'relative';
+          img.parentElement.style.position = img.parentElement.style.position || 'relative';
+          img.parentElement.appendChild(loadingDiv);
+
           const desc = await this.describeSingleImage(img);
-          img.setAttribute('alt', desc);
-          img.setAttribute('aria-label', desc);
+          
+          // Remove loading
+          loadingDiv.remove();
+          img.style.outline = '';
           img.removeAttribute('aria-busy');
-          // Announce via live region
-          this.announce(desc);
+
+          if (desc && desc.length > 3) {
+            img.setAttribute('alt', desc);
+            img.setAttribute('aria-label', desc);
+            this.described.add(img);
+            this.injectDescriptionBadge(img, desc);
+            this.announce(desc);
+          } else {
+            this.announce('Could not generate a description for this image.');
+          }
         };
 
         img._omniDescHandler = handler;

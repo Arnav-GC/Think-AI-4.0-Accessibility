@@ -135,19 +135,6 @@
           </div>
         </div>
 
-        <fieldset class="radio-group" id="listening-mode-group" aria-describedby="listen-mode-desc">
-          <legend class="radio-legend">Listening Mode</legend>
-          <p id="listen-mode-desc" class="helper-text">Choose how voice commands are activated.</p>
-          <label class="radio-label">
-            <input type="radio" name="listening-mode" value="continuous" id="mode-continuous" />
-            <span>Continuous Listening</span>
-          </label>
-          <label class="radio-label">
-            <input type="radio" name="listening-mode" value="push_to_talk" id="mode-push" />
-            <span>Push-to-Talk</span>
-          </label>
-        </fieldset>
-
         <!-- Voice Commands Cheat Sheet -->
         <details style="margin-top: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px;">
           <summary style="cursor: pointer; font-weight: 700; color: #60a5fa; user-select: none; display: flex; align-items: center; justify-content: space-between;">
@@ -451,6 +438,15 @@
             Voices are provided by your operating system.
           </p>
         </div>
+
+        <div class="button-row" style="margin-top: 12px; display: flex; gap: 8px;">
+          <button id="btn-start-read-aloud" class="btn-primary" type="button" style="flex: 1;">
+            ▶ Read Page Aloud
+          </button>
+          <button id="btn-stop-read-aloud" class="btn-secondary" type="button" style="flex: 1; color: #fca5a5; border-color: rgba(239,68,68,0.3);">
+            ⏹ Stop Reading
+          </button>
+        </div>
       </section>
 
       <!-- Sound Labels -->
@@ -583,6 +579,44 @@
             aria-valuemax="200"
             aria-valuenow="100"
             aria-valuetext="100 percent" />
+        </div>
+      </section>
+
+      <!-- Blue Light Filter -->
+      <section class="section-card" aria-labelledby="bluelight-heading">
+        <h2 id="bluelight-heading" class="section-title">Blue Light Filter</h2>
+
+        <div class="control-row">
+          <label class="toggle-label" for="bluelight-toggle">
+            <span class="toggle-text">Enable Blue Light Filter</span>
+            <span class="toggle-switch">
+              <input type="checkbox" id="bluelight-toggle" class="toggle-input"
+                     aria-describedby="bluelight-desc" />
+              <span class="toggle-slider" aria-hidden="true"></span>
+            </span>
+          </label>
+          <p id="bluelight-desc" class="helper-text">
+            Apply a warm overlay to reduce blue light emission — easier on the eyes at night.
+          </p>
+        </div>
+
+        <div class="slider-group">
+          <label for="bluelight-slider" class="slider-label">
+            Intensity:
+            <span id="bluelight-value" class="slider-value" aria-live="polite">50%</span>
+          </label>
+          <input
+            type="range"
+            id="bluelight-slider"
+            class="range-slider"
+            min="10"
+            max="100"
+            step="5"
+            value="50"
+            aria-valuemin="10"
+            aria-valuemax="100"
+            aria-valuenow="50"
+            aria-valuetext="50 percent" />
         </div>
       </section>
 
@@ -779,6 +813,10 @@
           </button>
         </div>
         <div id="images-status" class="status-message" aria-live="polite" role="status"></div>
+        <div id="images-results-container" style="display: none; margin-top: 12px; background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 8px; padding: 10px; max-height: 260px; overflow-y: auto;">
+          <div style="font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em;">Generated Image Descriptions:</div>
+          <div id="images-results-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 12px; line-height: 1.4;"></div>
+        </div>
       </section>
 
       <!-- WCAG Auditor -->

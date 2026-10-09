@@ -287,10 +287,29 @@
     applyCursor(settings.cursorEnabled);
     applyReadingRuler(settings.readingRulerEnabled);
 
-    if (settings.switchAccessEnabled) {
-      startSwitchAccess(settings.switchScanSpeed);
+    const switchOn = Boolean(settings.switchAccessEnabled || settings.switchEnabled);
+    if (switchOn && !document.hidden) {
+      if (window.OmniSwitchAccess) {
+        if (!window.__omniSwitchInstance) {
+          const speed = (settings.scanSpeed ?? (settings.switchScanSpeed ? settings.switchScanSpeed / 1000 : 2.0));
+          window.__omniSwitchInstance = typeof window.OmniSwitchAccess === 'function'
+            ? new window.OmniSwitchAccess({
+                scanSpeed: speed,
+                scanMode: settings.scanMode || 'auto',
+                switchKey: settings.switchKey || 'Space'
+              })
+            : window.OmniSwitchAccess;
+        }
+        window.__omniSwitchInstance.start();
+      } else {
+        startSwitchAccess(settings.switchScanSpeed || 2000);
+      }
     } else {
-      stopSwitchAccess();
+      if (window.__omniSwitchInstance) {
+        window.__omniSwitchInstance.stop();
+      } else {
+        stopSwitchAccess();
+      }
     }
 
     if (settings.captionsEnabled) {
@@ -316,30 +335,25 @@
     }
 
     // ── Start / stop Voice Nav based on settings ────────────────────────────────
+    // Voice nav uses Web Speech recognition mic. To prevent mic activating in multiple
+    // background tabs simultaneously, only the active visible tab should start voice nav.
     if (window.OmniVoiceNav) {
-      if (settings.voiceEnabled && !window.OmniVoiceNav.isActive) {
+      if (settings.voiceEnabled && !window.OmniVoiceNav.isActive && !document.hidden) {
         window.OmniVoiceNav.start();
       } else if (!settings.voiceEnabled && window.OmniVoiceNav.isActive) {
         window.OmniVoiceNav.stop();
       }
     }
 
-    // ── Start / stop Read Aloud based on settings ───────────────────────────────
+    // ── Configure Read Aloud settings (do NOT auto-start reading on load/profile/gaze/mic) ────
     if (window.OmniReadAloud) {
-      // Update TTS settings first
       window.OmniReadAloud.updateSettings({
         ttsSpeed: settings.ttsSpeed || 1.0,
         ttsPitch: settings.ttsPitch || 1.0,
         ttsVoice: settings.ttsVoice || null
       });
-      if (settings.readAloudEnabled && !window.OmniReadAloud.isReading) {
-        // Small delay to let the page finish any transitions before reading
-        setTimeout(() => {
-          if (currentSettings.readAloudEnabled && window.OmniReadAloud && !window.OmniReadAloud.isReading) {
-            window.OmniReadAloud.readPage();
-          }
-        }, 800);
-      } else if (!settings.readAloudEnabled && window.OmniReadAloud.isReading) {
+      // If user turned read aloud off, stop speaking
+      if (!settings.readAloudEnabled && window.OmniReadAloud.isReading) {
         window.OmniReadAloud.stop();
       }
     }
@@ -1935,14 +1949,37 @@
 
     // Switch Access
     if (message.type === 'START_SWITCH_ACCESS') {
-      if (window.OmniSwitchAccess) window.OmniSwitchAccess.start();
-      else startSwitchAccess();
+      currentSettings.switchAccessEnabled = true;
+      currentSettings.switchEnabled = true;
+      const speed = message.scanSpeed ?? currentSettings.scanSpeed ?? 2.0;
+      const mode = message.scanMode ?? currentSettings.scanMode ?? 'auto';
+      const key = message.switchKey ?? currentSettings.switchKey ?? 'Space';
+
+      if (window.OmniSwitchAccess) {
+        if (!window.__omniSwitchInstance) {
+          window.__omniSwitchInstance = typeof window.OmniSwitchAccess === 'function'
+            ? new window.OmniSwitchAccess({ scanSpeed: speed, scanMode: mode, switchKey: key })
+            : window.OmniSwitchAccess;
+        } else {
+          window.__omniSwitchInstance.updateSettings({ scanSpeed: speed, scanMode: mode, switchKey: key });
+        }
+        window.__omniSwitchInstance.start();
+      } else {
+        startSwitchAccess(speed * 1000);
+      }
       sendResponse({ success: true });
       return true;
     }
     if (message.type === 'STOP_SWITCH_ACCESS') {
-      if (window.OmniSwitchAccess) window.OmniSwitchAccess.stop();
-      else stopSwitchAccess();
+      currentSettings.switchAccessEnabled = false;
+      currentSettings.switchEnabled = false;
+      if (window.__omniSwitchInstance) {
+        window.__omniSwitchInstance.stop();
+      } else if (window.OmniSwitchAccess && typeof window.OmniSwitchAccess.stop === 'function') {
+        window.OmniSwitchAccess.stop();
+      } else {
+        stopSwitchAccess();
+      }
       sendResponse({ success: true });
       return true;
     }
@@ -2191,7 +2228,9 @@
     // Input tab switch settings
     if (message.type === 'SET_SCAN_SPEED') {
       currentSettings.scanSpeed = message.value;
-      if (currentSettings.switchAccessEnabled) {
+      if (window.__omniSwitchInstance) {
+        window.__omniSwitchInstance.updateSettings({ scanSpeed: message.value });
+      } else if (currentSettings.switchAccessEnabled || currentSettings.switchEnabled) {
         startSwitchAccess(message.value * 1000);
       }
       sendResponse({ success: true });
@@ -2199,11 +2238,17 @@
     }
     if (message.type === 'SET_SCAN_MODE') {
       currentSettings.scanMode = message.mode;
+      if (window.__omniSwitchInstance) {
+        window.__omniSwitchInstance.updateSettings({ scanMode: message.mode });
+      }
       sendResponse({ success: true });
       return true;
     }
     if (message.type === 'SET_SWITCH_KEY') {
       currentSettings.switchKey = message.key;
+      if (window.__omniSwitchInstance) {
+        window.__omniSwitchInstance.updateSettings({ switchKey: message.key });
+      }
       sendResponse({ success: true });
       return true;
     }

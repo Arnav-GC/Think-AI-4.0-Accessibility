@@ -234,7 +234,7 @@ async function switchProfile(profileId) {
     blind_screen_reader: {
       // Core screen reader features
       voiceEnabled:         true,
-      readAloudEnabled:     true,
+      readAloudEnabled:     false,
       audioChimesEnabled:   true,
       soundLabelsEnabled:   true,
       notificationsEnabled: true,
@@ -361,6 +361,39 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             iconUrl: message.iconUrl
           });
           sendResponse({ success: true });
+          break;
+        }
+
+        /* Fetch a cross-origin image and return it as a base64 data URL.
+           Content scripts can't draw cross-origin images to canvas, but the
+           service worker has no such restriction. */
+        case 'FETCH_IMAGE_AS_DATA_URL': {
+          const imageUrl = message.url;
+          if (!imageUrl) {
+            sendResponse({ success: false, error: 'No URL provided.' });
+            break;
+          }
+          try {
+            const resp = await fetch(imageUrl);
+            if (!resp.ok) {
+              sendResponse({ success: false, error: `HTTP ${resp.status}` });
+              break;
+            }
+            const blob = await resp.blob();
+            // Convert blob to base64 using FileReader-like approach in service worker
+            const arrayBuffer = await blob.arrayBuffer();
+            const bytes = new Uint8Array(arrayBuffer);
+            let binary = '';
+            for (let i = 0; i < bytes.byteLength; i++) {
+              binary += String.fromCharCode(bytes[i]);
+            }
+            const base64 = btoa(binary);
+            const mimeType = blob.type || 'image/jpeg';
+            const dataUrl = `data:${mimeType};base64,${base64}`;
+            sendResponse({ success: true, dataUrl });
+          } catch (err) {
+            sendResponse({ success: false, error: err.message });
+          }
           break;
         }
 

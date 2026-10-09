@@ -528,33 +528,96 @@
 
         case 'VOLUME_UP': {
           const media = Array.from(document.querySelectorAll('video, audio'));
-          media.forEach(m => { m.volume = Math.min(1.0, m.volume + 0.25); m.muted = false; });
-          chime.success();
-          this._toast('🔊 Volume increased.', 'success');
+          if (media.length > 0) {
+            media.forEach(m => { m.volume = Math.min(1.0, m.volume + 0.25); m.muted = false; });
+            chime.success();
+            this._toast('🔊 Volume increased.', 'success');
+          } else {
+            // YouTube and custom players — simulate Up arrow key
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', code: 'ArrowUp', bubbles: true }));
+            chime.success();
+            this._toast('🔊 Volume up.', 'success');
+          }
           break;
         }
 
         case 'VOLUME_DOWN': {
           const media = Array.from(document.querySelectorAll('video, audio'));
-          media.forEach(m => { m.volume = Math.max(0.0, m.volume - 0.25); });
-          chime.success();
-          this._toast('🔉 Volume decreased.', 'success');
+          if (media.length > 0) {
+            media.forEach(m => { m.volume = Math.max(0.0, m.volume - 0.25); });
+            chime.success();
+            this._toast('🔉 Volume decreased.', 'success');
+          } else {
+            // YouTube and custom players — simulate Down arrow key
+            document.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', code: 'ArrowDown', bubbles: true }));
+            chime.success();
+            this._toast('🔉 Volume down.', 'success');
+          }
           break;
         }
 
         case 'VOLUME_MUTE': {
           const media = Array.from(document.querySelectorAll('video, audio'));
-          media.forEach(m => { m.muted = true; });
-          chime.click();
-          this._toast('🔇 Audio muted.', 'info');
+          let acted = false;
+          // 1. Standard HTML5 media
+          media.forEach(m => { m.muted = true; acted = true; });
+          // 2. YouTube mute button (if it exists and shows "Mute")
+          const ytMuteBtn = document.querySelector('.ytp-mute-button');
+          if (ytMuteBtn) {
+            const label = (ytMuteBtn.getAttribute('aria-label') || ytMuteBtn.getAttribute('title') || '').toLowerCase();
+            if (label.includes('mute') && !label.includes('unmute')) {
+              ytMuteBtn.click();
+              acted = true;
+            }
+          }
+          // 3. Generic mute buttons on custom players
+          if (!acted) {
+            const muteBtn = document.querySelector(
+              'button[aria-label*="Mute" i], button[title*="Mute" i], [role="button"][aria-label*="Mute" i]'
+            );
+            if (muteBtn) {
+              const label = (muteBtn.getAttribute('aria-label') || muteBtn.getAttribute('title') || '').toLowerCase();
+              if (!label.includes('unmute')) { muteBtn.click(); acted = true; }
+            }
+          }
+          if (acted) {
+            chime.click();
+            this._toast('🔇 Audio muted.', 'info');
+          } else {
+            chime.error();
+            this._toast('No media found to mute.', 'info');
+          }
           break;
         }
 
         case 'VOLUME_UNMUTE': {
           const media = Array.from(document.querySelectorAll('video, audio'));
-          media.forEach(m => { m.muted = false; if (m.volume < 0.1) m.volume = 0.5; });
-          chime.success();
-          this._toast('🔊 Audio unmuted.', 'success');
+          let acted = false;
+          // 1. Standard HTML5 media
+          media.forEach(m => { m.muted = false; if (m.volume < 0.1) m.volume = 0.5; acted = true; });
+          // 2. YouTube unmute button
+          const ytMuteBtn = document.querySelector('.ytp-mute-button');
+          if (ytMuteBtn) {
+            const label = (ytMuteBtn.getAttribute('aria-label') || ytMuteBtn.getAttribute('title') || '').toLowerCase();
+            if (label.includes('unmute')) {
+              ytMuteBtn.click();
+              acted = true;
+            }
+          }
+          // 3. Generic unmute buttons on custom players
+          if (!acted) {
+            const unmuteBtn = document.querySelector(
+              'button[aria-label*="Unmute" i], button[title*="Unmute" i], [role="button"][aria-label*="Unmute" i]'
+            );
+            if (unmuteBtn) { unmuteBtn.click(); acted = true; }
+          }
+          if (acted) {
+            chime.success();
+            this._toast('🔊 Audio unmuted.', 'success');
+          } else {
+            chime.error();
+            this._toast('No media found to unmute.', 'info');
+          }
           break;
         }
 
