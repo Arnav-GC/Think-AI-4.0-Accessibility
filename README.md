@@ -6,6 +6,10 @@ Repository Links:
 - Think AI 4.0: https://github.com/Arnav-GC/Think-AI-4.0-Accessibility
 - New Think AI: https://github.com/Arnav-GC/New-Think-AI-
 
+Live Website Links:
+- Think AI 4.0 Website: https://arnav-gc.github.io/Think-AI-4.0-Accessibility/
+- New Think AI Website: https://arnav-gc.github.io/New-Think-AI-/
+
 ---
 
 ## Features
@@ -113,8 +117,9 @@ OmniAccess AI/
 ## Installation and Setup
 
 ### Web Portal and Interactive Demo
-Visit the hosted demonstration portal:
-https://arnav-gc.github.io/Think-AI-4.0-Accessibility/
+Visit the hosted demonstration portals:
+- Think AI 4.0: https://arnav-gc.github.io/Think-AI-4.0-Accessibility/
+- New Think AI: https://arnav-gc.github.io/New-Think-AI-/
 
 ### Manual Installation from Repository:
 1. Clone this repository or download and extract `omniaccess-ai-extension.zip`.
