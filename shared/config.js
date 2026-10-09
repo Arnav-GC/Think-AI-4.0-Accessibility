@@ -176,6 +176,7 @@ export const DEFAULT_CONFIG = {
     preferOfflineAI: true,
     geminiApiKey: '',
     geminiModel: 'gemini-2.0-flash',
+    groqApiKey: '',
     whisperApiKey: '',
     showFloatingDock: true,
   }

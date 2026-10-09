@@ -17,7 +17,7 @@
    ───────────────────────────────────────────────────────────────────────────── */
 const DEFAULT_CONFIG = {
   // Profile management
-  activeProfile: 'default',
+  activeProfile: 'custom',
   profiles: {
     default: { label: 'Default', icon: '👤' },
     lowVision: { label: 'Low Vision', icon: '👁️' },
@@ -59,8 +59,9 @@ const DEFAULT_CONFIG = {
   // AI
   geminiApiKey: '',
   grokApiKey: '',
-  aiProvider: 'gemini',               // 'gemini' | 'grok'
-  aiModel: 'gemini-2.0-flash',
+  groqApiKey: '',
+  aiProvider: 'groq',                 // 'groq' | 'gemini' | 'grok'
+  aiModel: 'openai/gpt-oss-20b',
   simplificationLevel: 'medium',      // 'easy' | 'medium' | 'expert'
 
   // Notifications
@@ -399,10 +400,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         case 'GET_AI_KEY': {
           const settings = await getSettings();
-          const provider = settings.aiProvider || 'gemini';
-          const key = provider === 'grok'
-            ? (settings.grokApiKey || '')
-            : (settings.geminiApiKey || '');
+          const provider = settings.aiProvider || 'groq';
+          const key = provider === 'groq'
+            ? (settings.groqApiKey || '')
+            : provider === 'grok'
+              ? (settings.grokApiKey || '')
+              : (settings.geminiApiKey || '');
           sendResponse({ success: true, key, provider });
           break;
         }

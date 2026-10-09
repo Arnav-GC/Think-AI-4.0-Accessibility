@@ -167,6 +167,7 @@
               // Derive a meaningful alt from the filename (strip extension and hyphens/underscores)
               const filename = (img.src || '').split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
               img.setAttribute('alt', filename || 'Image');
+              img.setAttribute('data-omni-auto-alt', ''); // placeholder alt; AI describer may replace it
             },
           });
         }

@@ -265,9 +265,11 @@
         const label = filename || 'Image';
         img.setAttribute('aria-label', label);
         img.setAttribute('alt', label);
+        img.setAttribute('data-omni-auto-alt', ''); // placeholder alt; AI describer may replace it
       } catch (_) {
         img.setAttribute('alt', 'Image');
         img.setAttribute('aria-label', 'Image');
+        img.setAttribute('data-omni-auto-alt', '');
       }
     });
   }
@@ -322,8 +324,9 @@
     const aiSettings = {
       geminiApiKey: settings.geminiApiKey || '',
       grokApiKey:   settings.grokApiKey   || '',
-      aiProvider:   settings.aiProvider   || 'gemini',
-      geminiModel:  settings.aiModel      || 'gemini-2.0-flash',
+      groqApiKey:   settings.groqApiKey   || '',
+      aiProvider:   settings.aiProvider   || 'groq',
+      geminiModel:  settings.aiModel      || 'openai/gpt-oss-20b',
       simplifyLevel: settings.simplificationLevel || 'medium',
       bionicReading: settings.bionicReadingEnabled || false
     };
@@ -356,6 +359,13 @@
       if (!settings.readAloudEnabled && window.OmniReadAloud.isReading) {
         window.OmniReadAloud.stop();
       }
+    }
+
+    // ── Blue Light Filter ───────────────────────────────────────────────────────
+    if (settings.blueLightFilterEnabled) {
+      applyBlueLightFilter(settings.blueLightIntensity || 50);
+    } else {
+      removeBlueLightFilter();
     }
 
     // Update dock button active states to reflect current settings.
@@ -778,7 +788,7 @@
 
     chrome.runtime.sendMessage({ type: 'GET_AI_KEY' }, async (resp) => {
       const key = resp && resp.key;
-      const provider = (resp && resp.provider) || 'gemini';
+      const provider = (resp && resp.provider) || 'groq';
       if (!key) {
         showToast('Please add your API key in the OmniAccess AI & Tools tab.', 'warning');
         return;
@@ -811,6 +821,35 @@
     };
     const instruction = levelMap[level] || levelMap.medium;
     const prompt = `${instruction}\n\nSimplify the following text:\n\n${text}`;
+
+    if (provider === 'groq') {
+      // Groq (OpenAI-compatible) running OpenAI's GPT-OSS model
+      const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-20b',
+          messages: [
+            { role: 'system', content: 'You are an accessibility plain-language simplifier. Output ONLY the simplified text, no preamble.' },
+            { role: 'user', content: prompt }
+          ],
+          max_completion_tokens: 1500,
+          temperature: 0.2,
+          reasoning_effort: 'low',
+          include_reasoning: false,
+          stream: false
+        })
+      });
+      if (!res.ok) {
+        const e = await res.json().catch(() => ({}));
+        throw new Error(e.error?.message || `Groq API error: ${res.status}`);
+      }
+      const data = await res.json();
+      return data?.choices?.[0]?.message?.content || '';
+    }
 
     if (provider === 'grok') {
       const res = await fetch('https://api.x.ai/v1/chat/completions', {
@@ -1117,8 +1156,10 @@
             try {
               const filename = new URL(element.src).pathname.split('/').pop().replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ');
               element.setAttribute('alt', filename || 'Image');
+              element.setAttribute('data-omni-auto-alt', '');
             } catch (_) {
               element.setAttribute('alt', 'Image');
+              element.setAttribute('data-omni-auto-alt', '');
             }
             fixed++;
           }
@@ -1495,7 +1536,7 @@
         }
         chrome.runtime.sendMessage({ type: 'GET_AI_KEY' }, async (resp) => {
           const key = resp && resp.key;
-          if (!key) { speakFeedback('Please add your Gemini API key first.'); return; }
+          if (!key) { speakFeedback('Please add your AI API key first.'); return; }
 
           const descs = await Promise.all(images.map(async (img) => {
             try {
@@ -1752,6 +1793,35 @@
     }
   }
 
+  /* ─── Blue Light Filter ──────────────────────────────────────────────────── */
+  const BLUELIGHT_OVERLAY_ID = `${PREFIX}-bluelight-overlay`;
+
+  function applyBlueLightFilter(intensity = 50) {
+    let overlay = document.getElementById(BLUELIGHT_OVERLAY_ID);
+    if (!overlay) {
+      overlay = document.createElement('div');
+      overlay.id = BLUELIGHT_OVERLAY_ID;
+      overlay.setAttribute('aria-hidden', 'true');
+      overlay.style.cssText = [
+        'position: fixed',
+        'top: 0', 'left: 0', 'width: 100vw', 'height: 100vh',
+        'pointer-events: none',
+        'z-index: 2147483646',
+        'mix-blend-mode: multiply',
+        'transition: background 0.3s ease'
+      ].join(';');
+      document.documentElement.appendChild(overlay);
+    }
+    // intensity 10-100 → opacity 0.05-0.45
+    const opacity = (intensity / 100) * 0.45;
+    overlay.style.background = `rgba(255, 180, 50, ${opacity.toFixed(3)})`;
+  }
+
+  function removeBlueLightFilter() {
+    const overlay = document.getElementById(BLUELIGHT_OVERLAY_ID);
+    if (overlay) overlay.remove();
+  }
+
   chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     if (!message || !message.type) return;
 
@@ -1808,8 +1878,9 @@
             window.OmniTextSimplifier.updateSettings({
               simplifyLevel: message.level,
               aiProvider: message.provider,
-              geminiApiKey: message.provider !== 'grok' ? message.apiKey : undefined,
-              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined
+              geminiApiKey: message.provider === 'gemini' ? message.apiKey : undefined,
+              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined,
+              groqApiKey: message.provider === 'groq' ? message.apiKey : undefined
             });
             const result = await window.OmniTextSimplifier.simplifyPage({
               apiKey: message.apiKey,
@@ -1835,8 +1906,9 @@
           if (window.OmniImageDescriber) {
             window.OmniImageDescriber.updateSettings({
               aiProvider: message.provider,
-              geminiApiKey: message.provider !== 'grok' ? message.apiKey : undefined,
-              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined
+              geminiApiKey: message.provider === 'gemini' ? message.apiKey : undefined,
+              grokApiKey: message.provider === 'grok' ? message.apiKey : undefined,
+              groqApiKey: message.provider === 'groq' ? message.apiKey : undefined
             });
             const result = await window.OmniImageDescriber.describeAllImages({
               apiKey: message.apiKey,
@@ -2037,6 +2109,26 @@
     if (message.type === 'SET_ZOOM') {
       const pct = Math.max(80, Math.min(200, Number(message.level) || 100));
       document.body.style.zoom = (pct / 100).toFixed(2);
+      sendResponse({ success: true });
+      return true;
+    }
+
+    // ── Blue Light Filter ───────────────────────────────────────────────────────
+    if (message.type === 'SET_BLUELIGHT_FILTER') {
+      currentSettings.blueLightFilterEnabled = message.enabled;
+      if (message.enabled) {
+        applyBlueLightFilter(currentSettings.blueLightIntensity || 50);
+      } else {
+        removeBlueLightFilter();
+      }
+      sendResponse({ success: true });
+      return true;
+    }
+    if (message.type === 'SET_BLUELIGHT_INTENSITY') {
+      currentSettings.blueLightIntensity = message.intensity;
+      if (currentSettings.blueLightFilterEnabled) {
+        applyBlueLightFilter(message.intensity);
+      }
       sendResponse({ success: true });
       return true;
     }

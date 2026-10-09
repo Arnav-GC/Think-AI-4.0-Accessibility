@@ -8,6 +8,15 @@ import { HeuristicSimplifier } from './heuristic-simplifier.js';
 
 // ── Provider constants ──────────────────────────────────────────────────────
 const PROVIDERS = {
+  groq: {
+    name: 'Groq (GPT-OSS)',
+    defaultModel: 'openai/gpt-oss-20b',
+    models: ['openai/gpt-oss-20b', 'openai/gpt-oss-120b'],
+    visionModel: 'qwen/qwen3.8-27b', // GPT-OSS is text-only; images use this model
+    endpoint: () => 'https://api.groq.com/openai/v1/chat/completions',
+    parseResponse: (data) => data?.choices?.[0]?.message?.content,
+    supportsVision: true,
+  },
   gemini: {
     name: 'Google Gemini',
     defaultModel: 'gemini-2.0-flash',
@@ -36,9 +45,9 @@ const PROVIDERS = {
 };
 
 export class GeminiService {
-  constructor(apiKey = '', provider = 'gemini') {
+  constructor(apiKey = '', provider = 'groq') {
     this.apiKey = apiKey;
-    this.provider = provider in PROVIDERS ? provider : 'gemini';
+    this.provider = provider in PROVIDERS ? provider : 'groq';
     this.model = PROVIDERS[this.provider].defaultModel;
   }
 
@@ -82,6 +91,48 @@ export class GeminiService {
     const data = await response.json();
     const text = info.parseResponse(data);
     if (!text) throw new Error('No content returned by Gemini.');
+    return text.trim();
+  }
+
+  /**
+   * Groq (OpenAI-compatible). `userContent` may be a string or a content-parts
+   * array (text + image_url). Pass `model` to override (e.g. the vision model).
+   */
+  async _callGroq(systemPrompt, userContent, generationConfig = {}, model = this.model) {
+    const info = PROVIDERS.groq;
+    const messages = [];
+    if (systemPrompt) messages.push({ role: 'system', content: systemPrompt });
+    messages.push({ role: 'user', content: userContent });
+
+    const body = {
+      model,
+      messages,
+      temperature: generationConfig.temperature ?? 0.3,
+      max_completion_tokens: generationConfig.maxOutputTokens ?? 1500,
+      stream: false,
+    };
+    if (model.startsWith('openai/gpt-oss')) {
+      body.reasoning_effort = 'low';
+      body.include_reasoning = false;
+    }
+
+    const response = await fetch(info.endpoint(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify(body),
+    });
+
+    if (!response.ok) {
+      const errJson = await response.json().catch(() => ({}));
+      throw new Error(errJson.error?.message || `Groq API error (${response.status})`);
+    }
+
+    const data = await response.json();
+    const text = info.parseResponse(data);
+    if (!text) throw new Error('No content returned by Groq.');
     return text.trim();
   }
 
@@ -165,6 +216,15 @@ export class GeminiService {
     }
 
     try {
+      if (this.provider === 'groq') {
+        const content = [
+          { type: 'text', text: promptInstruction },
+          { type: 'image_url', image_url: { url: imageSource } },
+        ];
+        const result = await this._callGroq('', content, { temperature: 0.3, maxOutputTokens: 400 }, PROVIDERS.groq.visionModel);
+        return { description: result, source: PROVIDERS.groq.visionModel, isOffline: false };
+      }
+
       if (this.provider === 'grok') {
         // Grok does not reliably support vision in all tiers — use text-only with URL hint
         const userContent = imageSource.startsWith('data:image/')
@@ -259,7 +319,13 @@ export class GeminiService {
       try {
         let result = '';
 
-        if (this.provider === 'grok') {
+        if (this.provider === 'groq') {
+          result = await this._callGroq(
+            systemPrompt,
+            text.slice(0, 4000),
+            { temperature: 0.2, maxOutputTokens: 1500 }
+          );
+        } else if (this.provider === 'grok') {
           result = await this._callGrok(
             systemPrompt,
             text.slice(0, 4000),
@@ -299,6 +365,27 @@ export class GeminiService {
     }
 
     try {
+      if (this.provider === 'groq') {
+        const response = await fetch(PROVIDERS.groq.endpoint(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`,
+          },
+          body: JSON.stringify({
+            model: this.model,
+            messages: [{ role: 'user', content: 'Hi' }],
+            max_completion_tokens: 50,
+            reasoning_effort: 'low',
+            include_reasoning: false,
+            stream: false,
+          }),
+        });
+        if (response.status === 200 || response.status === 429) return { valid: true };
+        const errJson = await response.json().catch(() => ({}));
+        return { valid: false, error: errJson.error?.message || `HTTP ${response.status}` };
+      }
+
       if (this.provider === 'grok') {
         // Grok: test with a minimal chat completion
         const response = await fetch('https://api.x.ai/v1/chat/completions', {

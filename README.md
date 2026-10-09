@@ -1,208 +1,203 @@
-# OmniAccess AI — Accessibility Chrome Extension
+# OmniAccess AI - Accessibility Chrome Extension
 
-**AI-powered digital accessibility assistant for Chrome** that helps people with visual, hearing, motor, and cognitive disabilities interact with any web content through alternative input and output methods.
+AI-powered digital accessibility assistant for Google Chrome that helps people with visual, hearing, motor, and cognitive disabilities interact with any web content through alternative input and output methods.
 
----
-
-## 🚀 Features
-
-### 🗣️ Voice-Controlled Navigation
-- Say **"click login"**, **"scroll down"**, **"fill search with hello"**, **"go back"**
-- Interactive numbered badge overlay: **"show numbers"** → **"click 4"**
-- Continuous or push-to-talk recognition modes
-- Real-time voice HUD with transcript display
-
-### 🖼️ AI Image & Page Descriptions
-- Describes charts, graphs, UI layouts, and memes aloud
-- Powered by **Gemini Vision API** with offline heuristic fallback
-- Auto-detects image type (chart/UI/meme/general) for contextual descriptions
-- Click-to-describe mode for individual images
-- Injects missing `alt` text and `aria-label` automatically
-
-### 📖 Text Simplifier
-- **3 reading levels**: Elementary (Grade 4), Plain English (Grade 8), Summary (bullet points)
-- **Dyslexia-friendly fonts**: Lexend, Atkinson Hyperlegible, OpenDyslexic
-- **Bionic Reading** mode (bold word-fixation points)
-- **Read Aloud** with word-by-word highlighting, speed/pitch/voice control
-- Flesch-Kincaid readability scoring
-- Powered by Gemini LLM or 100% offline heuristic engine
-
-### ♿ WCAG 2.2 Auditor
-- Checks: missing alt text, contrast < 4.5:1, missing form labels, heading hierarchy, vague links, unlabeled buttons, small touch targets (< 24px)
-- **Auto-fix**: injects alt text, aria-labels, skip navigation links
-- Visual report panel with severity colors (error/warning/notice)
-- Click any issue to scroll-and-highlight the offending element
-
-### 🎙️ Live Captions
-- Real-time speech-to-text overlay for web video/audio
-- Speaker change detection with **Speaker 1/2/3** labels
-- Sound labels: **[Music]**, **[Laughter]**, **[Applause]**
-- Draggable, resizable caption box
-- Adjustable font size (small/medium/large)
-
-### 🧭 Multimodal Input
-| Input Method | Description |
-|---|---|
-| **Voice** | Web Speech API continuous recognition |
-| **Gaze** | Webcam-based pupil tracking with dwell-click |
-| **Switch Access** | Keyboard/button scanner with auto-scan |
-| **Touch/Mouse** | Standard + large target mode |
-
-### 🔊 Multimodal Output
-| Output Method | Description |
-|---|---|
-| **Audio chimes** | Web Audio API sonification for all actions |
-| **Read Aloud** | Word-highlighted SpeechSynthesis |
-| **Live Captions** | Real-time speech-to-text overlay |
-| **High Contrast** | Yellow-on-black, white-on-black themes |
-| **Visual Alerts** | Screen flash for notifications |
-| **Haptic feedback** | Vibration patterns on mobile |
-
-### 🔒 Privacy-First
-- **100% on-device processing** for gaze tracking, switch access, heuristic simplification
-- Gemini API calls only happen when you configure an API key
-- Webcam video is processed locally in Canvas memory — never uploaded
-- Chrome Built-in AI (Prompt API) used when available for zero-network LLM
-- Offline mode for all core features
+Repository Links:
+- Think AI 4.0: https://github.com/Arnav-GC/Think-AI-4.0-Accessibility
+- New Think AI: https://github.com/Arnav-GC/New-Think-AI-
 
 ---
 
-## 📁 Project Structure
+## Features
+
+### Voice-Controlled Navigation
+- Natural command navigation: "click login", "scroll down", "fill search with hello", "go back"
+- Interactive numbered badge overlay: "show numbers" followed by "click 4"
+- Continuous listening mode and push-to-talk activation
+- Real-time HUD overlay showing transcribed utterance and command state
+
+### AI Image and Page Descriptions
+- Generates descriptive alt text for charts, graphs, UI layouts, diagrams, and memes
+- Supported AI providers: Groq (Qwen vision), Google Gemini (Gemini 2.0 Flash), and xAI Grok
+- Context-aware detection categorizes imagery as chart, UI, meme, or general photo
+- Click-to-describe interaction on individual images with live progress indicators
+- Injects missing standard alt attributes and ARIA labels into page DOM
+
+### Text Simplification and Reading Enhancements
+- Three reading comprehension targets: Elementary (Grade 4), Plain English (Grade 8), and Summary (bullet points)
+- Open-access dyslexia typefaces: Lexend, Atkinson Hyperlegible, and OpenDyslexic
+- Bionic Reading mode with bold fixation points to accelerate reading speed
+- Read Aloud engine with word-by-word visual tracking, configurable voice, speed, and pitch
+- Blue Light Filter overlay with customizable intensity for nocturnal comfort
+- Reading ruler and expanded text spacing options
+
+### WCAG 2.2 Auditor
+- Automated evaluation: missing alternative text, contrast ratios below 4.5:1, unassociated form inputs, broken heading order, ambiguous link names, small touch targets below 24x24 px
+- One-click auto-fix: injects placeholder labels, accessible ARIA roles, and skip-to-content landmarks
+- Visual interactive report categorized by severity: errors, warnings, and notices
+- Direct element inspection with automated scroll-and-highlight targeting
+
+### Live Captions
+- Low-latency speech-to-text captions overlay for browser audio and video playback
+- Speaker change detection providing numbered speaker attribution
+- Context sound indicators: [Music], [Laughter], [Applause]
+- Draggable and resizable caption HUD with customizable typography size
+
+### Multimodal Input Options
+
+| Input Method | Technology and Function |
+|---|---|
+| Voice Control | Web Speech API continuous recognition and custom grammar matching |
+| Gaze Tracking | In-browser pupil luminance analysis via Canvas API with dwell-click activation |
+| Switch Access | Single-key or multi-switch automatic scanning with custom scan intervals |
+| Touch and Pointer | Standard input plus enlarged hit targets and high-visibility focus indicators |
+
+### Multimodal Output Options
+
+| Output Method | Technology and Function |
+|---|---|
+| Audio Chimes | Synthesized tones via Web Audio API providing non-visual state cues |
+| Read Aloud | SpeechSynthesis API with real-time word boundary highlights |
+| Live Captions | Floating HUD transcript for media and ambient dialogue |
+| Contrast Themes | High contrast dark, light, and yellow-on-black color schemes |
+| Visual Alerts | Screen flash notifications designed for deaf and hard-of-hearing users |
+| Haptic Feedback | Vibration patterns on supported touch devices |
+
+### Privacy and Security Architecture
+- 100% on-device processing for gaze tracking, switch scanning, and heuristic text processing
+- Webcam video remains strictly inside local Canvas memory and is never recorded or streamed
+- Network requests to AI endpoints occur only when an explicit API key is configured by the user
+- Fallback heuristic engines operate completely offline without external network dependencies
+
+---
+
+## Project Structure
 
 ```
 OmniAccess AI/
-├── manifest.json                    # MV3 extension manifest
-├── background/
-│   └── service-worker.js            # Background service worker (settings, messaging)
-├── content/
-│   ├── content-main.js              # Main content script orchestrator
-│   ├── voice-nav.js                 # Voice recognition & navigation engine
-│   ├── gaze-tracker.js              # Webcam gaze & head gesture tracker
-│   ├── live-captions.js             # Live speech-to-text captions
-│   ├── switch-access.js             # Switch scanning engine
-│   ├── wcag-auditor.js              # WCAG 2.2 accessibility checker
-│   ├── read-aloud.js                # Word-highlighted read aloud engine
-│   ├── image-describer.js           # AI vision image descriptions
-│   ├── text-simplifier.js           # LLM + heuristic text simplification
-│   ├── overlay.css                  # All injected UI styles
-│   └── fonts.css                    # Dyslexia fonts & typography
-├── sidepanel/
-│   ├── index.html                   # Side panel main UI (WCAG AA)
-│   ├── sidepanel.css                # Side panel styles (dark theme)
-│   └── sidepanel.js                 # Side panel controller
-├── shared/
-│   ├── config.js                    # Default profiles & voice command dict
-│   ├── gemini-api.js                # Gemini VLM & LLM API integration
-│   ├── heuristic-simplifier.js      # Offline-first text simplification
-│   ├── audio-chimes.js              # Web Audio API sonification
-│   └── storage-manager.js           # chrome.storage sync/local manager
-├── icons/
-│   ├── icon-16.png
-│   ├── icon-48.png
-│   └── icon-128.png
-└── scripts/
-    └── generate_icons.py            # Icon generation utility
+|-- manifest.json                    # Manifest V3 extension configuration
+|-- background/
+|   `-- service-worker.js            # Background service worker (state, storage, CORS fetcher)
+|-- content/
+|   |-- content-main.js              # Content script coordinator and dock injector
+|   |-- voice-nav.js                 # Speech recognition and navigation command parser
+|   |-- gaze-tracker.js              # Webcam pupil tracking and dwell activation
+|   |-- live-captions.js             # Live speech transcription HUD
+|   |-- switch-access.js             # Switch scanning engine
+|   |-- wcag-auditor.js              # WCAG 2.2 compliance validator
+|   |-- read-aloud.js                # SpeechSynthesis TTS with word-level highlight
+|   |-- image-describer.js           # Multimodal vision image description engine
+|   |-- text-simplifier.js           # LLM and heuristic simplification engine
+|   |-- overlay.css                  # UI styles for all page overlays and HUDs
+|   `-- fonts.css                    # Dyslexia-friendly typefaces
+|-- sidepanel/
+|   |-- index.html                   # Side panel interface (WCAG 2.2 AA compliant)
+|   |-- sidepanel.css                # Dark theme side panel design system
+|   `-- sidepanel.js                 # Side panel state and event controller
+|-- shared/
+|   |-- config.js                    # Accessibility profiles and command dictionaries
+|   |-- gemini-api.js                # Groq, Gemini, and Grok API client
+|   |-- heuristic-simplifier.js      # Rule-based offline text simplification
+|   |-- audio-chimes.js              # Web Audio tone synthesizer
+|   `-- storage-manager.js           # Chrome storage synchronization utilities
+|-- icons/
+|   |-- icon-16.png
+|   |-- icon-48.png
+|   `-- icon-128.png
+`-- scripts/
+    `-- generate_icons.py            # PNG icon generation script
 ```
 
 ---
 
-## 🛠️ Installation & Live Demo
+## Installation and Setup
 
-You can install the extension and test all features interactively via the official website:
+### Web Portal and Interactive Demo
+Visit the hosted demonstration portal:
+https://arnav-gc.github.io/Think-AI-4.0-Accessibility/
 
-👉 **[Launch OmniAccess AI Website & Install Guide](https://arnav-gc.github.io/Think-AI-4.0-Accessibility/)**
-
-### Quick Install Steps:
-1. Visit the website above or download [`omniaccess-ai-extension.zip`](omniaccess-ai-extension.zip) from this repository.
-2. Unzip the downloaded file into a folder on your computer.
-3. Open Google Chrome and go to `chrome://extensions/`.
-4. Turn on **Developer mode** in the top right corner.
-5. Click **Load unpacked** and select the unzipped folder.
-6. Pin **OmniAccess AI** to your Chrome toolbar to begin!
+### Manual Installation from Repository:
+1. Clone this repository or download and extract `omniaccess-ai-extension.zip`.
+2. Open Google Chrome and navigate to `chrome://extensions/`.
+3. Enable **Developer mode** using the toggle in the upper right corner.
+4. Click **Load unpacked** in the top navigation bar.
+5. Select the folder containing `manifest.json`.
+6. Pin **OmniAccess AI** to the browser toolbar for quick access.
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-### Gemini API Key (for AI features)
-1. Get a free API key at [ai.google.dev](https://ai.google.dev)
-2. Open OmniAccess AI side panel → **AI & Tools** tab
-3. Paste your key and click **Save Key**
-4. Click **Test Key** to verify
-5. Now image descriptions, text simplification, and chart reading use Gemini AI
+### AI Providers (Optional)
+To use advanced vision descriptions or LLM simplification:
+1. Obtain an API key from one of the supported providers:
+   - Groq: https://console.groq.com (Default model: openai/gpt-oss-20b for text, qwen/qwen3.8-27b for vision)
+   - Google AI Studio: https://aistudio.google.com (Gemini 2.0 Flash)
+   - xAI: https://console.x.ai (Grok)
+2. Open the OmniAccess AI side panel and select the **AI & Tools** tab.
+3. Select your provider, enter the key, and select **Save Key**.
+4. Select **Test Key** to confirm connectivity.
+
+Core assistive features including switch access, gaze tracking, offline contrast themes, read aloud, and offline heuristic simplification remain fully functional without any API key.
 
 ### Accessibility Profiles
-Switch between preset profiles:
-- **Low Vision** — high contrast + large cursor + zoom
-- **Blind / Screen Reader** — voice nav + auto-describe images + audio chimes
-- **Motor / Switch** — switch scanning + gaze + voice
-- **Cognitive / Dyslexia** — Bionic Reading + Lexend font + text simplification
-- **Deaf / Hard of Hearing** — live captions + sound labels + visual alerts
-- **Custom** — mix and match any settings
+Pre-configured profiles allow one-click setup:
+- **Low Vision**: High contrast, enlarged cursor, custom zoom scaling
+- **Blind / Screen Reader**: Voice navigation, image narration, audio sonification
+- **Motor / Switch Access**: Automated scanning, dwell gaze input, enlarged tap areas
+- **Cognitive / Dyslexia**: Bionic Reading, Lexend font, reduced reading level
+- **Deaf / Hard of Hearing**: Live caption HUD, sound labels, visual alert flash
+- **Custom**: Granular manual adjustment of every setting
 
 ---
 
-## ⌨️ Keyboard Shortcuts
+## Keyboard Shortcuts
 
-| Shortcut | Action |
+| Key Combination | Action |
 |---|---|
-| `Alt + A` | Toggle floating dock |
-| `Alt + V` | Toggle voice navigation |
-| `Alt + R` | Read page aloud |
-| `Alt + S` | Stop reading |
+| `Alt + A` | Toggle floating accessibility toolbar |
+| `Alt + V` | Toggle microphone voice control |
+| `Alt + R` | Start reading page aloud |
+| `Alt + S` | Stop text-to-speech reading |
 
 ---
 
-## 🎤 Voice Commands
+## Voice Commands Reference
 
-| Say | Action |
+| Spoken Phrase | Action |
 |---|---|
-| `"click [element]"` | Click button/link by name |
-| `"scroll down"` / `"scroll up"` | Scroll page |
-| `"show numbers"` | Show numbered markers |
-| `"click 4"` | Click element #4 |
-| `"fill search with hello"` | Fill form field |
-| `"read page"` | Start read aloud |
-| `"stop reading"` | Stop read aloud |
-| `"audit page"` | Run WCAG audit |
-| `"simplify text"` | Simplify page text |
-| `"describe image"` | AI image descriptions |
-| `"toggle contrast"` | Toggle high contrast |
-| `"help"` | List all commands |
+| "click [element name]" | Click link or button matching text |
+| "show numbers" | Display numbered badge overlays on interactive elements |
+| "click [number]" | Trigger click on specific badge number |
+| "scroll down" / "scroll up" | Scroll page view |
+| "scroll to top" / "scroll to bottom" | Jump to extreme page boundaries |
+| "fill [field] with [text]" | Enter text into matching input fields |
+| "read page" | Narrate visible page content |
+| "stop reading" | Silence speech narration |
+| "audit page" | Execute WCAG 2.2 accessibility scan |
+| "simplify text" | Simplify selected or page content |
+| "describe image" | Request AI description of on-screen imagery |
+| "toggle contrast" | Switch high contrast mode |
+| "toggle captions" | Open or close Live Captions HUD |
+| "help" | Read list of supported voice commands |
 
 ---
 
-## 🧩 Technology Stack
+## Technical Architecture
 
-| Feature | Technology |
+| Component | Technical Implementation |
 |---|---|
-| Speech recognition | Web Speech API (SpeechRecognition) |
-| Text-to-speech | Web Speech API (SpeechSynthesis) |
-| Image descriptions | Gemini 1.5 Flash / gemini-2.0-flash Vision API |
-| Text simplification | Gemini API + Chrome Built-in AI (Prompt API) + Heuristic engine |
-| Gaze tracking | Browser Canvas + WebGL pixel analysis (privacy-first) |
-| Audio feedback | Web Audio API (no external files) |
-| Storage | chrome.storage.sync + local (cross-device sync) |
-| Extension | Manifest V3, Chrome APIs |
+| Speech Recognition | Web Speech API SpeechRecognition interface |
+| Text-to-Speech | Web Speech API SpeechSynthesis interface |
+| Computer Vision | Groq vision API (qwen/qwen3.8-27b) and Google Gemini Vision |
+| Language Modeling | Groq (openai/gpt-oss-20b), Google Gemini, xAI Grok, and local heuristic parser |
+| Gaze Tracking | HTML5 Canvas pixel differential analysis with dynamic calibration |
+| Audio Feedback | Web Audio API OscillatorNode and GainNode synthesis |
+| Storage and Sync | chrome.storage.sync with fallback to chrome.storage.local |
+| Extension Framework | Chrome Manifest V3, Service Workers, Content Script Isolation |
 
 ---
 
-## 🔮 Roadmap
+## License
 
-- [ ] MediaPipe Face Mesh integration for precise gaze tracking
-- [ ] Whisper API alternative for speech recognition
-- [ ] Page narration with positional audio cues
-- [ ] Export accessibility audit report as PDF
-- [ ] Multi-language voice command support
-- [ ] Screen magnifier lens
-- [ ] Color blindness simulation & correction filters
-
----
-
-## 📜 License
-
-MIT License — Built for the Think AI TCET Hackathon
-
----
-
-*OmniAccess AI is itself built to be accessible: the extension UI follows WCAG 2.2 AA guidelines, all controls have proper labels, and the interface is fully keyboard-navigable.*
+This project is licensed under the MIT License. Developed for the Think AI TCET Hackathon.

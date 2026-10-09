@@ -82,6 +82,37 @@
     const prompt = `${targetDesc}\n\nText to process:\n"""\n${text.slice(0, 4500)}\n"""\n\nOutput only the processed text with no conversational preamble:`;
 
     try {
+      if (provider === 'groq') {
+        // Groq running OpenAI's GPT-OSS model (OpenAI-compatible endpoint)
+        const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey.trim()}`
+          },
+          body: JSON.stringify({
+            model: 'openai/gpt-oss-20b',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are an expert accessibility assistant specializing in clear, concise summarization and plain language rewriting. Return only the final text, formatting cleanly with bullet points or paragraphs.'
+              },
+              { role: 'user', content: prompt }
+            ],
+            max_completion_tokens: 1500,
+            temperature: 0.3,
+            reasoning_effort: 'low',
+            include_reasoning: false,
+            stream: false
+          })
+        });
+        if (response.ok) {
+          const data = await response.json();
+          return data?.choices?.[0]?.message?.content?.trim() || null;
+        }
+        return null;
+      }
+
       if (provider === 'grok') {
         const grokModels = ['grok-2-1212', 'grok-beta', 'grok-3-mini-fast', 'grok-3-mini', 'grok-2'];
         for (const model of grokModels) {
@@ -142,18 +173,18 @@
   class TextSimplifierEngine {
     constructor() {
       this.apiKey = '';
-      this.provider = 'gemini';
-      this.model = 'gemini-2.0-flash';
+      this.provider = 'groq';
+      this.model = 'openai/gpt-oss-20b';
       this.level = 'plain'; // 'elementary' | 'plain' | 'summary'
       this.bionicEnabled = false;
       this.originalTexts = new Map(); // el -> original innerHTML
       this.isSimplified = false;
     }
 
-    updateSettings({ geminiApiKey, grokApiKey, aiProvider, geminiModel, simplifyLevel, bionicReading } = {}) {
+    updateSettings({ geminiApiKey, grokApiKey, groqApiKey, aiProvider, geminiModel, simplifyLevel, bionicReading } = {}) {
       if (aiProvider !== undefined) this.provider = aiProvider;
-      if (aiProvider === 'grok' && grokApiKey !== undefined) this.apiKey = grokApiKey;
-      else if (geminiApiKey !== undefined) this.apiKey = geminiApiKey;
+      const keys = { groq: groqApiKey, grok: grokApiKey, gemini: geminiApiKey };
+      if (keys[this.provider] !== undefined) this.apiKey = keys[this.provider];
       if (geminiModel !== undefined) this.model = geminiModel;
       if (simplifyLevel !== undefined) this.level = simplifyLevel;
       if (bionicReading !== undefined) this.bionicEnabled = bionicReading;

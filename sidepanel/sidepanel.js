@@ -378,6 +378,8 @@ async function loadAndPopulateSettings() {
   setValue("contrast-theme-select", s.contrastTheme || "yellow-black");
   setCheckbox("large-cursor-toggle", s.largeCursorEnabled);
   setSlider("zoom-slider", "zoom-value", s.zoomLevel ?? 100, "%");
+  setCheckbox("bluelight-toggle", s.blueLightFilterEnabled);
+  setSlider("bluelight-slider", "bluelight-value", s.blueLightIntensity ?? 50, "%");
   setCheckbox("dyslexia-font-toggle", s.dyslexiaFontEnabled);
   setValue("dyslexia-font-select", s.dyslexiaFont || "Lexend");
   setCheckbox("bionic-reading-toggle", s.bionicReadingEnabled);
@@ -397,8 +399,8 @@ async function loadAndPopulateSettings() {
   // Restore saved API key for active provider and show "remembered" badge
   const keyInput = document.getElementById("api-key-input");
   const savedBadge = document.getElementById("key-saved-badge");
-  const activeProvider = s.aiProvider || "gemini";
-  const savedKey = activeProvider === "grok" ? (s.grokApiKey || "") : (s.geminiApiKey || "");
+  const activeProvider = s.aiProvider || "groq";
+  const savedKey = s[PROVIDER_INFO[activeProvider]?.storageKey || "groqApiKey"] || "";
 
   if (keyInput) {
     keyInput.value = savedKey;
@@ -793,6 +795,12 @@ function bindVisualTabControls() {
 // ── Provider UI helpers (defined before bindAiTabControls) ──────────────────
 
 const PROVIDER_INFO = {
+  groq: {
+    placeholder: 'Enter your Groq API key (gsk_...)…',
+    hint: 'Get a free key at console.groq.com → API Keys',
+    model: 'openai/gpt-oss-20b (text) / qwen3.8-27b (images)',
+    storageKey: 'groqApiKey',
+  },
   gemini: {
     placeholder: 'Enter your Gemini API key…',
     hint: 'Get a free key at aistudio.google.com → Get API Key',
@@ -808,7 +816,7 @@ const PROVIDER_INFO = {
 };
 
 function updateProviderUI(provider) {
-  const info = PROVIDER_INFO[provider] || PROVIDER_INFO.gemini;
+  const info = PROVIDER_INFO[provider] || PROVIDER_INFO.groq;
   const keyInput = document.getElementById("api-key-input");
   const hintEl = document.getElementById("api-key-desc");
   if (keyInput) keyInput.placeholder = info.placeholder;
@@ -817,7 +825,7 @@ function updateProviderUI(provider) {
 }
 
 function updateModelLabel(provider) {
-  const info = PROVIDER_INFO[provider] || PROVIDER_INFO.gemini;
+  const info = PROVIDER_INFO[provider] || PROVIDER_INFO.groq;
   const modelEl = document.getElementById("model-name");
   if (modelEl) modelEl.textContent = info.model;
 }
@@ -839,12 +847,12 @@ function bindAiTabControls() {
 
   // Helper: get current provider
   function currentProvider() {
-    return providerSelect ? providerSelect.value : "gemini";
+    return providerSelect ? providerSelect.value : "groq";
   }
 
   // Helper: get storage key for the current provider
   function storageKeyFor(provider) {
-    return PROVIDER_INFO[provider]?.storageKey || "geminiApiKey";
+    return PROVIDER_INFO[provider]?.storageKey || "groqApiKey";
   }
 
   // When provider changes — update placeholder/hint, load saved key for that provider
@@ -968,8 +976,8 @@ function bindAiTabControls() {
 
       // Get latest settings to ensure content script receives current API key
       const settings = await getSettings();
-      const provider = settings.aiProvider || "gemini";
-      const apiKey = provider === "grok" ? (settings.grokApiKey || "") : (settings.geminiApiKey || "");
+      const provider = settings.aiProvider || "groq";
+      const apiKey = settings[PROVIDER_INFO[provider]?.storageKey || "groqApiKey"] || "";
 
       const response = await sendToTab({
         type: "SIMPLIFY_PAGE",
@@ -1004,8 +1012,8 @@ function bindAiTabControls() {
 
       // Get latest settings to ensure content script receives current API key
       const settings = await getSettings();
-      const provider = settings.aiProvider || "gemini";
-      const apiKey = provider === "grok" ? (settings.grokApiKey || "") : (settings.geminiApiKey || "");
+      const provider = settings.aiProvider || "groq";
+      const apiKey = settings[PROVIDER_INFO[provider]?.storageKey || "groqApiKey"] || "";
 
       const response = await sendToTab({
         type: "DESCRIBE_IMAGES",
@@ -1132,12 +1140,37 @@ function populateVoiceSelect() {
 /**
  * Test whether the given API key works for the specified provider.
  * @param {string} apiKey
- * @param {string} provider — 'gemini' | 'grok'
+ * @param {string} provider — 'groq' | 'gemini' | 'grok'
  * @returns {Promise<{valid: boolean, error?: string}>}
  */
-async function testApiKey(apiKey, provider = 'gemini') {
+async function testApiKey(apiKey, provider = 'groq') {
   if (!apiKey || apiKey.length < 10) {
     return { valid: false, error: "Please enter a non-empty API key." };
+  }
+
+  if (provider === 'groq') {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${apiKey.trim()}`,
+        },
+        body: JSON.stringify({
+          model: 'openai/gpt-oss-20b',
+          messages: [{ role: 'user', content: 'Hi' }],
+          max_completion_tokens: 50,
+          reasoning_effort: 'low',
+          include_reasoning: false,
+          stream: false,
+        }),
+      });
+      if (response.status === 200 || response.status === 429) return { valid: true };
+      const errJson = await response.json().catch(() => ({}));
+      return { valid: false, error: errJson.error?.message || `HTTP ${response.status}` };
+    } catch (err) {
+      return { valid: false, error: err.message };
+    }
   }
 
   if (provider === 'grok') {

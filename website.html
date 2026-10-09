@@ -1,728 +1,817 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>OmniAccess AI — Intelligent Digital Accessibility</title>
-  <link rel="stylesheet" href="content/overlay.css" />
-  <style>
-    /* In-page High Contrast overrides */
-    html[data-omni-contrast="yellow-black"],
-    html[data-omni-contrast="yellow-black"] body {
-      background-color: #000000 !important;
-      color: #ffff00 !important;
-    }
-    html[data-omni-contrast="yellow-black"] .demo-card,
-    html[data-omni-contrast="yellow-black"] .feature-card,
-    html[data-omni-contrast="yellow-black"] .interactive-box,
-    html[data-omni-contrast="yellow-black"] header,
-    html[data-omni-contrast="yellow-black"] footer {
-      background-color: #000000 !important;
-      color: #ffff00 !important;
-      border-color: #ffff00 !important;
-    }
-    html[data-omni-contrast="yellow-black"] h1,
-    html[data-omni-contrast="yellow-black"] h2,
-    html[data-omni-contrast="yellow-black"] h3,
-    html[data-omni-contrast="yellow-black"] p,
-    html[data-omni-contrast="yellow-black"] span,
-    html[data-omni-contrast="yellow-black"] li {
-      color: #ffff00 !important;
-      -webkit-text-fill-color: #ffff00 !important;
-    }
-    html[data-omni-contrast="yellow-black"] .btn {
-      background: #000000 !important;
-      color: #ffff00 !important;
-      border: 2px solid #ffff00 !important;
-    }
-    html[data-omni-contrast="yellow-black"] .demo-tab-btn.active {
-      background: #ffff00 !important;
-      color: #000000 !important;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="description" content="OmniAccess AI: a Chrome extension for voice navigation, AI image descriptions, text simplification, live captions and WCAG 2.2 auditing." />
+<title>OmniAccess AI — Intelligent Digital Accessibility</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
+<style>
+:root{
+  --bg:#f5f7ff;
+  --surface:#ffffff;
+  --surface-soft:#eef2ff;
+  --ink:#111936;
+  --muted:#5d6785;
+  --line:#dce3f3;
+  --blue:#4f46e5;
+  --blue-dark:#3730a3;
+  --cyan:#15b8a6;
+  --violet:#8b5cf6;
+  --navy:#101936;
+  --shadow:0 22px 60px rgba(36,53,106,.10);
+  --shadow-sm:0 10px 28px rgba(36,53,106,.08);
+  --radius:24px;
+  --sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:6.5rem;-webkit-text-size-adjust:100%}
+body{font-family:var(--sans);font-size:16px;font-weight:400;line-height:1.7;letter-spacing:-.012em;background:var(--bg);color:var(--ink);overflow-x:hidden;min-height:100vh;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 7% 9%,rgba(99,102,241,.10),transparent 29%),radial-gradient(ellipse at 93% 29%,rgba(20,184,166,.07),transparent 24%)}
+button,input{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:3px solid #6366f1;outline-offset:4px;border-radius:10px;box-shadow:0 0 0 5px rgba(99,102,241,.12)}
+.skip-link{position:absolute;top:-999px;left:1rem;background:var(--navy);color:#fff;padding:.75rem 1.1rem;border-radius:999px;z-index:1000;font-weight:700;text-decoration:none}
+.skip-link:focus{top:1rem}
+.ic{width:1.15em;height:1.15em;flex:none;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wrap{max-width:1200px;margin:0 auto;padding:0 1.6rem}
+section{margin-bottom:6rem;scroll-margin-top:7rem}
+h1,h2,h3{font-weight:750;letter-spacing:-.04em;line-height:1.13}
+h1{font-size:clamp(2.75rem,5.4vw,5rem);font-weight:800;letter-spacing:-.065em;line-height:1.02;max-width:720px}
+h1 span{color:var(--blue);background:linear-gradient(100deg,#4f46e5 5%,#7c3aed 52%,#0891b2 100%);background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+h2.sec{font-size:clamp(1.8rem,3vw,2.55rem);letter-spacing:-.05em}
+.eyebrow{display:inline-flex;align-items:center;gap:.55rem;font-size:.72rem;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--blue);margin-bottom:1rem;background:#e9eaff;border:1px solid #d9dcff;border-radius:999px;padding:.48rem .82rem}
+.eyebrow::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px rgba(21,184,166,.13)}
+.sub{color:var(--muted);max-width:650px;margin-top:.75rem;font-size:1.03rem}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:1.5rem;flex-wrap:wrap;margin-bottom:2rem}
+.small{font-size:.875rem;color:var(--muted)}
 
-    :root {
-      --bg: #0b1120;
-      --bg-gradient: radial-gradient(circle at 15% 15%, rgba(59, 130, 246, 0.18) 0%, transparent 40%),
-                     radial-gradient(circle at 85% 25%, rgba(139, 92, 246, 0.15) 0%, transparent 45%),
-                     radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.12) 0%, transparent 50%),
-                     linear-gradient(180deg, #0b1120 0%, #0f172a 50%, #080d1a 100%);
-      --card-bg: rgba(23, 32, 54, 0.72);
-      --border: rgba(148, 163, 184, 0.15);
-      --accent: #3b82f6;
-      --accent-glow: rgba(59, 130, 246, 0.4);
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-      --success: #10b981;
-    }
+/* Announcement + navigation */
+.announcement{display:flex;justify-content:center;align-items:center;gap:.65rem;flex-wrap:wrap;padding:.5rem 1rem;background:var(--navy);color:#e8edff;font-size:.76rem;font-weight:600;letter-spacing:.01em;text-align:center}
+.announcement .announcement-dot{width:6px;height:6px;border-radius:50%;background:#53e0c0;box-shadow:0 0 0 4px rgba(83,224,192,.13)}
+.announcement a{color:#aebaff;text-decoration:none;font-weight:800;margin-left:.25rem}
+.announcement a:hover{color:#fff}
+header{position:sticky;top:0;z-index:100;display:flex;justify-content:space-between;align-items:center;gap:1.5rem;padding:.85rem max(1.6rem,calc((100% - 1200px)/2));background:rgba(248,250,255,.84);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);border-bottom:1px solid rgba(220,227,243,.88)}
+.brand{display:flex;align-items:center;gap:.72rem;color:var(--ink);text-decoration:none;font-weight:800;font-size:1.05rem;letter-spacing:-.04em;white-space:nowrap}
+.brand-icon{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;background:linear-gradient(145deg,#5d57f5,#3930a3);color:#fff;box-shadow:0 8px 18px rgba(79,70,229,.24)}
+.brand-icon .ic{width:21px;height:21px}
+.nav-links{display:flex;gap:.25rem;align-items:center;flex-wrap:wrap}
+.nav-link{color:#5b6481;font-weight:650;font-size:.875rem;text-decoration:none;padding:.6rem .82rem;border-radius:12px;min-height:42px;display:inline-flex;align-items:center;transition:background .2s,color .2s}
+.nav-link:hover{color:var(--blue);background:#eceeff}
+.nav-cta{margin-left:.5rem}
+.menu-toggle{display:none;align-items:center;gap:.55rem;border:1px solid var(--line);border-radius:12px;background:#fff;padding:.65rem .8rem;font-weight:750;font-size:.85rem}
+.menu-bars{display:grid;gap:4px;width:17px}
+.menu-bars span{height:2px;width:100%;border-radius:9px;background:currentColor;display:block}
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    }
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.6rem;min-height:48px;padding:.78rem 1.25rem;border-radius:14px;font-weight:750;font-size:.92rem;line-height:1.1;text-decoration:none;cursor:pointer;white-space:normal;color:var(--ink);background:#fff;border:1px solid #d9e0f2;box-shadow:0 3px 0 rgba(20,35,80,.035);transition:transform .2s,background .2s,color .2s,box-shadow .2s,border-color .2s}
+.btn:hover{background:#f8f9ff;border-color:#bac5f5;transform:translateY(-2px);box-shadow:0 10px 20px rgba(36,53,106,.09)}
+.btn:active{transform:translateY(0);box-shadow:none}
+.btn .ic{width:1.05rem;height:1.05rem}
+.btn-primary{background:linear-gradient(110deg,#4f46e5,#5145d7 60%,#6d4de4);color:#fff;border-color:transparent;box-shadow:0 10px 22px rgba(79,70,229,.24)}
+.btn-primary:hover{background:linear-gradient(110deg,#4338ca,#4f46e5);color:#fff;border-color:transparent;box-shadow:0 13px 26px rgba(79,70,229,.3)}
+.btn-light{background:#fff;color:var(--navy);border-color:#fff}
+.btn-light:hover{background:#e9edff;border-color:#e9edff}
+.btn-sm{min-height:42px;padding:.62rem .95rem;font-size:.85rem;border-radius:12px}
+.chip{display:inline-flex;align-items:center;min-height:42px;padding:.48rem .9rem;border-radius:999px;font-weight:700;font-size:.82rem;cursor:pointer;background:#fff;border:1px solid var(--line);color:var(--muted);transition:all .18s}
+.chip:hover{border-color:#aaaef9;color:var(--blue)}
+.chip[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff;box-shadow:0 6px 15px rgba(79,70,229,.18)}
 
-    body {
-      background: var(--bg-gradient);
-      background-attachment: fixed;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      overflow-x: hidden;
-      min-height: 100vh;
-    }
+/* Hero */
+.hero{position:relative;display:grid;grid-template-columns:1.02fr .98fr;gap:3.7rem;align-items:center;max-width:1280px;margin:0 auto;padding:5.2rem 2rem 5rem}
+.hero::before{content:"";position:absolute;width:380px;height:380px;right:-130px;top:18px;border-radius:50%;background:radial-gradient(circle,rgba(99,102,241,.13),rgba(99,102,241,0) 68%);pointer-events:none}
+.hero>div:first-child{position:relative;z-index:1}
+.hero .lead{font-size:clamp(1.02rem,1.5vw,1.16rem);color:var(--muted);margin:1.5rem 0 2rem;max-width:570px;line-height:1.8}
+.row{display:flex;gap:.7rem;flex-wrap:wrap;align-items:center}
+.hero .row .btn{min-height:53px;padding:.9rem 1.25rem}
+.hero-proof{display:flex;gap:.65rem 1rem;align-items:center;flex-wrap:wrap;margin-top:1.6rem;color:var(--muted);font-size:.78rem;font-weight:700}
+.hero-proof span{display:inline-flex;align-items:center;gap:.38rem}
+.hero-proof .ic{color:#0c9b83;width:1rem;height:1rem}
+.stack{position:relative;display:grid;grid-template-columns:1.18fr .92fr;grid-template-rows:auto auto;gap:1rem;isolation:isolate}
+.stack::before{content:"";position:absolute;inset:9% -5% -4% 10%;border-radius:38px;background:linear-gradient(145deg,#dfe5ff,#e0f7f3);z-index:-1;transform:rotate(3deg)}
+.panel-c{background:rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.9);border-radius:22px;box-shadow:var(--shadow);padding:1.05rem;backdrop-filter:blur(12px)}
+.stack .tall{grid-row:span 2;transform:rotate(-1deg);padding:1.1rem}
+.mock-bar{display:flex;align-items:center;gap:.35rem;padding:.2rem .25rem .75rem}
+.mock-bar i{width:8px;height:8px;border-radius:50%;background:#d4dafa;display:block}
+.mock-bar i:first-child{background:#ff8a9a}.mock-bar i:nth-child(2){background:#f7c66d}.mock-bar i:nth-child(3){background:#72d8b8}
+.mock-bar span{flex:1;margin-left:.35rem;padding:.25rem .6rem;border-radius:8px;background:#f1f3ff;border:1px solid #e3e7fb;font-size:.65rem;color:#75809f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mock-body{position:relative;height:300px;border-radius:15px;background:linear-gradient(145deg,#f8faff,#edf1ff);border:1px solid #dfe5fb;padding:1rem;overflow:hidden}
+.ln{height:8px;border-radius:8px;background:#d5dcf1;margin-bottom:.72rem}.ln.h{height:13px;width:55%;background:#818bd0}.w90{width:88%}.w70{width:66%}.w80{width:78%}.w50{width:46%}
+.mock-img{position:absolute;right:14px;top:46px;width:83px;height:58px;border-radius:10px;background:linear-gradient(145deg,#a9e3db,#717ce9);border:4px solid #fff;box-shadow:0 5px 12px rgba(52,69,143,.12)}
+.mock-img::after{content:"";position:absolute;inset:12px 17px 11px 16px;border-radius:4px;background:rgba(255,255,255,.55);clip-path:polygon(50% 0,100% 100%,0 100%)}
+.mock-badge{position:absolute;background:var(--blue);color:#fff;font-weight:800;font-size:.7rem;width:24px;height:24px;border-radius:8px;display:grid;place-items:center;box-shadow:0 5px 12px rgba(79,70,229,.22)}
+.b1{top:11px;right:14px}.b2{top:90px;left:12px}.b3{top:142px;right:72px;background:#fff;color:var(--blue);outline:2px solid #8b8ff9;outline-offset:2px}
+.mock-hud{position:absolute;left:12px;bottom:51px;background:#151d3c;color:#fff;padding:.38rem .75rem;border-radius:10px;font-family:var(--mono);font-size:.68rem;box-shadow:0 8px 16px rgba(17,25,54,.18)}
+.mock-hud::before{content:"●";color:#53dfbf;margin-right:.45rem;font-size:.6rem}
+.mock-cap{position:absolute;left:10px;right:10px;bottom:10px;background:#171e3a;color:#fff;border:1px solid rgba(255,255,255,.15);border-radius:9px;padding:.48rem .6rem;font-size:.63rem;line-height:1.45}
+.mini{display:flex;flex-direction:column;gap:.5rem;min-height:0;justify-content:center;animation:float 6s ease-in-out infinite}
+.stack .mini:last-child{animation-delay:-2s}
+.mini .t{display:flex;align-items:center;gap:.5rem;font-weight:800;font-size:.8rem;letter-spacing:-.02em}
+.mini .tile{display:grid;place-items:center;width:33px;height:33px;border-radius:10px;background:#edf0ff;color:var(--blue)}
+.mini p{font-size:.75rem;color:var(--muted);line-height:1.55}
+.mini .tag{font-size:.6rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#0b927d}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
 
-    /* Skip link for accessibility */
-    .skip-link {
-      position: absolute;
-      top: -999px;
-      left: 1rem;
-      background: var(--accent);
-      color: #fff;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-      z-index: 1000;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    .skip-link:focus {
-      top: 1rem;
-    }
+/* quick principles strip */
+.principles-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:-.7rem 0 6rem}
+.principle-item{display:flex;align-items:center;gap:.9rem;padding:1.15rem 1.2rem;background:rgba(255,255,255,.8);border:1px solid #e3e8f6;border-radius:18px;box-shadow:0 5px 18px rgba(36,53,106,.035)}
+.principle-item .tile{width:42px;height:42px;flex:none;border-radius:13px;background:#eceeff;color:var(--blue);display:grid;place-items:center}
+.principle-item strong{display:block;font-size:.89rem;letter-spacing:-.025em}
+.principle-item span{display:block;color:var(--muted);font-size:.75rem;line-height:1.45;margin-top:.12rem}
 
-    header {
-      padding: 1.25rem 2.5rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      position: sticky;
-      top: 0;
-      background: rgba(11, 17, 32, 0.75);
-      z-index: 100;
-    }
+/* Preference controls */
+#workspace-start{scroll-margin-top:7rem}
+.panel{background:rgba(255,255,255,.94);border:1px solid #e0e6f6;border-radius:28px;box-shadow:var(--shadow);padding:clamp(1.3rem,3vw,2.4rem)}
+#welcome-prompt .panel{position:relative;overflow:hidden}
+#welcome-prompt .panel::before{content:"";position:absolute;left:0;top:0;width:100%;height:5px;background:linear-gradient(90deg,var(--blue),var(--violet),var(--cyan))}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:.8rem;margin:1.4rem 0}
+.opts label{display:flex;align-items:center;gap:.72rem;min-height:60px;padding:.75rem 1rem;border-radius:15px;cursor:pointer;font-weight:650;font-size:.9rem;border:1px solid #dfe5f4;background:#fbfcff;transition:all .18s}
+.opts label:hover{background:#f0f2ff;border-color:#b9c1fb;transform:translateY(-1px)}
+.opts label:has(input:checked){background:#efefff;border-color:#9da4f6;box-shadow:inset 0 0 0 1px rgba(79,70,229,.06)}
+.opts input{width:19px;height:19px;accent-color:var(--blue);flex:none}
+.opts label .ic{color:var(--blue);width:1.1rem;height:1.1rem}
+.status{font-size:.875rem;font-weight:700;min-height:1.4rem;color:var(--blue)}
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      font-size: 1.25rem;
-      font-weight: 800;
-      color: #fff;
-      text-decoration: none;
-    }
+/* Section headings and feature cards */
+#features .sec-head{align-items:center}
+#features .sec-head>div:first-child{max-width:570px}
+#features .row[role="group"]{gap:.45rem}
+.fgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.2rem}
+.fcard{position:relative;display:flex;flex-direction:column;gap:.8rem;padding:1rem 1rem 1.25rem;background:rgba(255,255,255,.92);border:1px solid #e0e6f5;border-radius:23px;box-shadow:0 7px 22px rgba(36,53,106,.035);transition:transform .22s,border-color .22s,box-shadow .22s;overflow:hidden}
+.fcard:hover{transform:translateY(-5px);border-color:#c5cafa;box-shadow:var(--shadow-sm)}
+.fcard[hidden]{display:none}
+.fcard .tile{height:145px;border-radius:16px;background:linear-gradient(140deg,#eef0ff,#dfe4ff);display:grid;place-items:center;color:var(--blue);overflow:hidden;position:relative}
+.fcard .tile::before{content:"";position:absolute;width:130px;height:130px;border:1px solid rgba(79,70,229,.12);border-radius:50%;box-shadow:0 0 0 15px rgba(79,70,229,.04),0 0 0 30px rgba(79,70,229,.025)}
+.fcard:nth-child(2) .tile{background:linear-gradient(140deg,#e2faf5,#d2f3ed);color:#087e70}.fcard:nth-child(2) .tile::before{border-color:rgba(8,126,112,.13);box-shadow:0 0 0 15px rgba(8,126,112,.045),0 0 0 30px rgba(8,126,112,.025)}
+.fcard:nth-child(3) .tile{background:linear-gradient(140deg,#f1eaff,#e5ddff);color:#7745bd}.fcard:nth-child(3) .tile::before{border-color:rgba(119,69,189,.13);box-shadow:0 0 0 15px rgba(119,69,189,.045),0 0 0 30px rgba(119,69,189,.025)}
+.fcard:nth-child(4) .tile{background:linear-gradient(140deg,#fff3dc,#ffebc4);color:#a05b08}.fcard:nth-child(4) .tile::before{border-color:rgba(160,91,8,.13);box-shadow:0 0 0 15px rgba(160,91,8,.045),0 0 0 30px rgba(160,91,8,.025)}
+.fcard:nth-child(5) .tile{background:linear-gradient(140deg,#e3edff,#d8e2ff);color:#3159bc}.fcard:nth-child(5) .tile::before{border-color:rgba(49,89,188,.13);box-shadow:0 0 0 15px rgba(49,89,188,.045),0 0 0 30px rgba(49,89,188,.025)}
+.fcard:nth-child(6) .tile{background:linear-gradient(140deg,#ffe8ee,#ffdae5);color:#be4569}.fcard:nth-child(6) .tile::before{border-color:rgba(190,69,105,.13);box-shadow:0 0 0 15px rgba(190,69,105,.045),0 0 0 30px rgba(190,69,105,.025)}
+.fcard .tile .ic{width:43px;height:43px;stroke-width:1.6;position:relative;z-index:1}
+.fcard .cat{font-size:.68rem;color:var(--blue);font-weight:800;text-transform:uppercase;letter-spacing:.1em}
+.fcard h3{font-size:1.1rem;margin-top:-.2rem;letter-spacing:-.035em}
+.fcard p{font-size:.9rem;color:var(--muted);line-height:1.7;margin-top:-.15rem}
 
-    .brand-icon {
-      width: 32px;
-      height: 32px;
-      background: linear-gradient(135deg, #3b82f6, #60a5fa);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+/* How it works */
+.story{display:grid;grid-template-columns:1.2fr 1fr;gap:1.25rem}
+.story .big{position:relative;overflow:hidden;background:linear-gradient(145deg,#171f46,#252b68 70%,#373091);color:#fff;border-radius:27px;padding:1.8rem;box-shadow:0 20px 45px rgba(25,32,83,.19);display:flex;flex-direction:column;gap:1rem;min-height:370px;justify-content:flex-end}
+.story .big::before{content:"";position:absolute;right:-85px;top:-95px;width:260px;height:260px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 25px rgba(255,255,255,.035),0 0 0 52px rgba(255,255,255,.025)}
+.story .big .tile{position:relative;z-index:1;flex:1;border-radius:19px;background:linear-gradient(140deg,rgba(255,255,255,.13),rgba(255,255,255,.05));border:1px solid rgba(255,255,255,.15);display:grid;place-items:center;min-height:175px;padding:.6rem}
+.flow{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;justify-content:center;padding:1rem}
+.flow b{padding:.45rem .8rem;border-radius:10px;background:#fff;color:#252b68;border:1px solid rgba(255,255,255,.8);font-size:.78rem;font-weight:800}
+.flow .ic{color:#aab1ff}
+.story .side{display:grid;gap:1rem}
+.story .item{display:grid;grid-template-columns:56px 1fr;gap:1rem;align-items:start;padding:1.25rem;border-radius:21px;background:#fff;border:1px solid #e1e6f4;box-shadow:0 6px 20px rgba(36,53,106,.035)}
+.story .item .tile{width:56px;height:56px;border-radius:16px;background:#eef0ff;color:var(--blue);display:grid;place-items:center}
+.story .item h3{font-size:1rem;letter-spacing:-.025em;margin:.2rem 0 .3rem}
+.story .item p{font-size:.85rem;color:var(--muted);line-height:1.65}
+.num{font-size:.67rem;font-weight:800;letter-spacing:.13em;color:#aab5dd;text-transform:uppercase}
+.story .big h3{font-size:1.45rem;letter-spacing:-.045em;position:relative;z-index:1}
+.story .big p{color:#c9d1f3;position:relative;z-index:1;font-size:.92rem}
 
-    .nav-links {
-      display: flex;
-      gap: 1.5rem;
-      align-items: center;
-    }
+/* Profiles */
+.pgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.9rem}
+.pcard{padding:1.25rem;border-radius:20px;background:#fff;border:1px solid #e1e7f5;box-shadow:0 6px 20px rgba(36,53,106,.035);display:flex;flex-direction:column;gap:.6rem;transition:transform .2s,box-shadow .2s}
+.pcard:hover{transform:translateY(-4px);box-shadow:var(--shadow-sm)}
+.pcard .tile{width:46px;height:46px;border-radius:14px;background:#eff0ff;color:var(--blue);display:grid;place-items:center;margin-bottom:.2rem}
+.pcard h3{font-size:.96rem;letter-spacing:-.03em}
+.pcard p{font-size:.83rem;color:var(--muted);line-height:1.6}
 
-    .nav-link {
-      color: var(--text-muted);
-      text-decoration: none;
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-    .nav-link:hover {
-      color: #fff;
-    }
+/* Privacy cards */
+.privacy-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.privacy-card{background:#fff;border:1px solid #e0e7f6;border-radius:22px;padding:1.4rem;box-shadow:0 7px 24px rgba(36,53,106,.035)}
+.privacy-card .tile{display:grid;place-items:center;width:48px;height:48px;border-radius:15px;background:#e8f8f4;color:#078875;margin-bottom:1rem}
+.privacy-card:nth-child(2) .tile{background:#eeefff;color:var(--blue)}
+.privacy-card:nth-child(3) .tile{background:#fff2df;color:#a86309}
+.privacy-card h3{font-size:1.03rem;margin-bottom:.45rem}
+.privacy-card p{font-size:.88rem;color:var(--muted);line-height:1.7}
 
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.7rem 1.4rem;
-      border-radius: 10px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.2s ease;
-      cursor: pointer;
-      border: none;
-    }
+/* Interactive playground */
+.demo-card{background:linear-gradient(145deg,#fff,#f5f7ff);border-color:#dbe2f5;padding:clamp(1.3rem,3vw,2.2rem)}
+.demo-head{display:flex;justify-content:space-between;align-items:center;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.7rem}
+.demo-tabs{display:flex;gap:.25rem;flex-wrap:wrap;padding:.35rem;border-radius:16px;background:#eceffd;border:1px solid #dce2fa}
+.demo-tab-btn{min-height:42px;padding:.55rem .9rem;border-radius:12px;background:transparent;border:1px solid transparent;color:#616b8c;cursor:pointer;font-weight:750;font-size:.82rem;transition:all .18s}
+.demo-tab-btn:hover{color:var(--blue)}
+.demo-tab-btn.active{background:#fff;color:var(--blue);border-color:#dbe0fb;box-shadow:0 5px 13px rgba(36,53,106,.08)}
+.pane{display:grid;gap:1rem}.pane.two{grid-template-columns:1fr 1fr}
+.interactive-box{border:1px solid #dfe5f5;border-radius:20px;padding:1.45rem;background:#fff;display:flex;flex-direction:column;gap:1rem;box-shadow:0 6px 22px rgba(36,53,106,.035)}
+.interactive-box h3{font-size:1.07rem;letter-spacing:-.035em}
+.interactive-box p,.interactive-box li{color:var(--muted);font-size:.91rem;line-height:1.7}
+.interactive-box ul{padding-left:1.2rem;display:grid;gap:.35rem}
+.interactive-box strong{color:var(--ink)}
+#demo-sample-text{line-height:1.9;font-size:1.03rem;color:var(--ink);padding:1.1rem 1.2rem;border-radius:14px;border:1px solid #e4e8f6;border-left:4px solid var(--blue);background:#f7f8ff}
+kbd,code{background:#eff1ff;border:1px solid #dce2fa;border-radius:7px;padding:2px 7px;font-family:var(--mono);font-size:.8em;color:#4148a8}
+.note{font-weight:700;min-height:1.4rem;font-size:.87rem;color:var(--blue)}
 
-    .btn-primary {
-      background: linear-gradient(135deg, #2563eb, #3b82f6);
-      color: #fff;
-      box-shadow: 0 4px 14px var(--accent-glow);
-    }
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5);
-    }
+/* Voice commands */
+.cmds{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem}
+.cmds>div{padding:1.35rem 1.4rem;border-radius:20px;background:#fff;border:1px solid #e1e7f5;box-shadow:0 6px 18px rgba(36,53,106,.035);transition:transform .2s,border-color .2s}
+.cmds>div:hover{transform:translateY(-3px);border-color:#c5cbf8}
+.cmds h3{font-size:1rem;margin-bottom:.85rem;display:flex;align-items:center;gap:.55rem}
+.cmds h3::before{content:"";display:block;width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 4px #e6f8f4}
+.cmds ul{list-style:none;display:grid;gap:.62rem;font-size:.84rem;color:var(--muted)}
+.cmds code{font-size:.76rem;white-space:normal;display:inline-block;line-height:1.5}
 
-    .btn-secondary {
-      background: rgba(255, 255, 255, 0.05);
-      color: var(--text);
-      border: 1px solid var(--border);
-    }
-    .btn-secondary:hover {
-      background: rgba(255, 255, 255, 0.1);
-      transform: translateY(-2px);
-    }
+/* FAQs */
+.faq-list{display:grid;gap:.75rem;max-width:900px;margin:0 auto}
+.faq-list details{background:#fff;border:1px solid #e0e6f5;border-radius:17px;padding:0 1.2rem;box-shadow:0 5px 18px rgba(36,53,106,.025)}
+.faq-list details[open]{border-color:#c9cdfb;box-shadow:0 8px 24px rgba(36,53,106,.06)}
+.faq-list summary{position:relative;list-style:none;cursor:pointer;padding:1.1rem 2.2rem 1.1rem 0;font-weight:750;font-size:.94rem;letter-spacing:-.02em}
+.faq-list summary::-webkit-details-marker{display:none}
+.faq-list summary::after{content:"+";position:absolute;right:0;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:29px;height:29px;border-radius:10px;background:#eef0ff;color:var(--blue);font-size:1.25rem;line-height:1}
+.faq-list details[open] summary::after{content:"−"}
+.faq-list details p{padding:0 0 1.2rem;color:var(--muted);font-size:.9rem;line-height:1.75;max-width:780px}
 
-    .hero {
-      max-width: 1100px;
-      margin: 4rem auto;
-      padding: 0 2rem;
-      text-align: center;
-    }
+/* Install band */
+.band{position:relative;overflow:hidden;background:radial-gradient(circle at 100% 0,rgba(128,101,255,.42),transparent 34%),linear-gradient(135deg,#111a3b,#252a65 70%,#302c7b);color:#fff;border-radius:30px;padding:clamp(2.5rem,5vw,4rem) 2rem;text-align:center;box-shadow:0 24px 60px rgba(29,34,96,.22)}
+.band::before{content:"";position:absolute;left:-110px;bottom:-210px;width:360px;height:360px;border:1px solid rgba(255,255,255,.13);border-radius:50%;box-shadow:0 0 0 28px rgba(255,255,255,.03),0 0 0 58px rgba(255,255,255,.025);pointer-events:none}
+.band>*{position:relative;z-index:1}
+.band h2{font-size:clamp(1.8rem,3vw,2.65rem);letter-spacing:-.05em;margin-bottom:.7rem}
+.band .lead2{color:#d0d7f5;max-width:560px;margin:0 auto 1.75rem;font-size:1rem}
+.steps{max-width:760px;margin:2.6rem auto 0;text-align:left;display:grid;gap:1rem;list-style:none;counter-reset:s}
+.steps li{counter-increment:s;display:grid;grid-template-columns:38px 1fr;gap:1rem;align-items:start;color:#dfe5ff;font-size:.92rem;line-height:1.7}
+.steps li::before{content:counter(s);width:36px;height:36px;border-radius:12px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.28);display:grid;place-items:center;font-weight:800;font-size:.85rem;color:#fff}
+.steps strong{color:#fff}
+.band code{background:rgba(0,0,0,.23);border-color:rgba(255,255,255,.2);color:#fff}
+.band .tip{margin:2rem auto 0;max-width:760px;font-size:.83rem;color:#bfc9ed;text-align:left;border-top:1px solid rgba(255,255,255,.18);padding-top:1.25rem}
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 0.35rem 0.9rem;
-      background: rgba(59, 130, 246, 0.1);
-      border: 1px solid rgba(59, 130, 246, 0.3);
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      color: #60a5fa;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-    }
+/* Footer */
+footer{background:#101731;color:#e8ecff;margin-top:2rem}
+.foot{max-width:1200px;margin:0 auto;padding:3.5rem 1.6rem;display:grid;grid-template-columns:1.5fr 1fr 1fr 1fr;gap:2.3rem}
+.foot h2{font-size:.73rem;letter-spacing:.14em;text-transform:uppercase;color:#9da9d0;margin-bottom:1rem;font-weight:800}
+.foot ul{list-style:none;display:grid;gap:.6rem;font-size:.88rem}
+.foot a{color:#e8ecff;text-decoration:none;transition:color .16s}
+.foot a:hover{color:#aeb4ff}
+.foot p{color:#aab5d8;font-size:.87rem;margin-top:1rem;max-width:300px;line-height:1.7}
+.foot .brand{color:#fff}.foot .brand-icon{background:linear-gradient(145deg,#7b74ff,#4f46e5);color:#fff;box-shadow:none}
+.legal{background:#0b1024;color:#8f9abd;font-size:.76rem;text-align:center;padding:1.05rem 1rem;border-top:1px solid rgba(255,255,255,.06)}
+.back-to-top{position:fixed;right:1.2rem;bottom:1.2rem;z-index:90;width:46px;height:46px;border:1px solid rgba(255,255,255,.4);border-radius:15px;background:var(--blue);color:#fff;display:grid;place-items:center;box-shadow:0 10px 24px rgba(79,70,229,.28);opacity:0;visibility:hidden;transform:translateY(8px);transition:all .2s;text-decoration:none}
+.back-to-top.visible{opacity:1;visibility:visible;transform:translateY(0)}
+.back-to-top:hover{background:var(--blue-dark);transform:translateY(-2px)}
 
-    h1 {
-      font-size: 3.5rem;
-      font-weight: 900;
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-      margin-bottom: 1.5rem;
-      background: linear-gradient(180deg, #fff 0%, #cbd5e1 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
+/* Contrast modes retained for the demo controls */
+html[data-omni-contrast="yellow-black"],html[data-omni-contrast="yellow-black"] body{background:#000!important;color:#ff0!important}
+html[data-omni-contrast="yellow-black"] *{box-shadow:none!important;border-color:#ff0!important}
+html[data-omni-contrast="yellow-black"] :is(header,footer,.foot,.legal,.panel,.panel-c,.demo-card,.interactive-box,.big,.item,.pcard,.cmds div,.band,.opts label,.btn,.chip,.demo-tabs,.tile,.fcard,.privacy-card,.principle-item,.faq-list details){background:#000!important;color:#ff0!important}
+html[data-omni-contrast="yellow-black"] :is(h1,h2,h3,p,span,li,small,label,a,b,.num,code,kbd,.eyebrow,.cat,.sub,.lead,.lead2){color:#ff0!important;background:transparent!important;-webkit-text-fill-color:#ff0!important}
+html[data-omni-contrast="yellow-black"] :is(.btn,.chip,.opts label){border:2px solid #ff0!important}
+html[data-omni-contrast="yellow-black"] :is(.demo-tab-btn.active,.chip[aria-pressed="true"]){background:#ff0!important;color:#000!important}
+html[data-omni-contrast="yellow-black"] .ic{stroke:#ff0!important}
+html[data-omni-contrast="yellow-black"] .fcard .tile,html[data-omni-contrast="yellow-black"] .fcard .tile::before{background:#000!important}
 
-    .hero p {
-      font-size: 1.25rem;
-      color: var(--text-muted);
-      max-width: 760px;
-      margin: 0 auto 2.5rem;
-    }
+@media(max-width:1050px){
+  .hero{grid-template-columns:1fr .9fr;gap:2.2rem;padding-top:4.3rem}
+  .pgrid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .fgrid{gap:1rem}
+  .nav-link{padding:.55rem .65rem}
+}
+@media(max-width:850px){
+  header{padding:.75rem 1.25rem}
+  .hero{grid-template-columns:1fr;gap:2.3rem;padding:3.6rem 1.35rem 4rem}
+  .hero>div:first-child{max-width:760px}
+  .stack{max-width:680px;width:100%;margin:0 auto}
+  .principles-strip{grid-template-columns:1fr;margin-top:0;margin-bottom:5rem}
+  .principle-item{padding:1rem}
+  .story,.pane.two{grid-template-columns:1fr}
+  .fgrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .privacy-grid{grid-template-columns:1fr 1fr}
+  .privacy-card:last-child{grid-column:1/-1}
+  .foot{grid-template-columns:1fr 1fr}
+  .cmds{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .demo-head{align-items:flex-start}
+}
+@media(max-width:680px){
+  .announcement{font-size:.69rem;gap:.4rem}
+  header{padding:.7rem 1rem;gap:.65rem}
+  .brand{font-size:1rem}.brand-icon{width:36px;height:36px;border-radius:12px}
+  .menu-toggle{display:inline-flex;margin-left:auto}
+  .nav-links{display:none;position:absolute;top:calc(100% + 7px);left:.8rem;right:.8rem;align-items:stretch;flex-direction:column;gap:.25rem;padding:.7rem;background:rgba(255,255,255,.98);border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+  .nav-links.is-open{display:flex}
+  .nav-link{display:flex;width:100%;padding:.72rem .85rem;border-radius:12px}
+  .nav-cta{margin:.25rem 0 0;width:100%}
+  .wrap{padding:0 1rem}
+  section{margin-bottom:4.5rem}
+  .hero{padding:3rem 1rem 3.1rem;gap:2rem}
+  h1{font-size:clamp(2.5rem,12vw,3.8rem)}
+  .hero .lead{font-size:1rem;margin:1.2rem 0 1.6rem}
+  .hero .row .btn{width:100%}
+  .hero-proof{gap:.6rem .8rem;font-size:.73rem}
+  .stack{grid-template-columns:1.08fr .92fr;gap:.65rem}
+  .stack .tall{padding:.7rem;border-radius:17px}
+  .panel-c{padding:.7rem;border-radius:17px}
+  .mock-body{height:250px;padding:.7rem}
+  .mock-img{width:65px;height:46px;right:8px;top:41px}
+  .mock-hud{left:8px;bottom:49px;font-size:.61rem}
+  .mock-cap{left:7px;right:7px;bottom:7px;font-size:.55rem}
+  .b3{right:43px;top:130px}
+  .mini .t{font-size:.7rem;align-items:flex-start}.mini .tile{width:28px;height:28px;flex:none}.mini p{font-size:.68rem}.mini .tag{font-size:.54rem}
+  .principles-strip{gap:.65rem;margin-bottom:4.5rem}
+  .panel{border-radius:22px;padding:1.2rem}
+  .opts{grid-template-columns:1fr;gap:.6rem}
+  .sec-head{align-items:flex-start;gap:1rem;margin-bottom:1.4rem}
+  #features .sec-head{align-items:flex-start}
+  #features .row[role="group"]{width:100%}
+  .chip{min-height:38px;padding:.4rem .7rem;font-size:.75rem}
+  .fgrid{grid-template-columns:1fr;gap:.85rem}
+  .fcard{padding:.8rem .8rem 1.1rem;border-radius:20px}
+  .fcard .tile{height:125px}
+  .story .big{padding:1.3rem;min-height:350px;border-radius:23px}
+  .flow{padding:.35rem;gap:.4rem}
+  .flow b{font-size:.69rem;padding:.42rem .6rem}
+  .story .item{grid-template-columns:46px 1fr;padding:1rem;gap:.8rem}
+  .story .item .tile{width:46px;height:46px;border-radius:13px}
+  .pgrid{grid-template-columns:1fr 1fr;gap:.7rem}
+  .pcard{padding:1rem;border-radius:17px}
+  .pcard h3{font-size:.9rem}
+  .pcard p{font-size:.78rem}
+  .privacy-grid{grid-template-columns:1fr}
+  .privacy-card:last-child{grid-column:auto}
+  .demo-head{gap:1rem}
+  .demo-tabs{width:100%;display:grid;grid-template-columns:1fr;gap:.3rem;border-radius:15px}
+  .demo-tab-btn{text-align:left;width:100%}
+  .interactive-box{padding:1rem;border-radius:17px}
+  .cmds{grid-template-columns:1fr}
+  .band{padding:2.5rem 1.2rem;border-radius:23px}
+  .steps li{grid-template-columns:34px 1fr;gap:.75rem;font-size:.86rem}
+  .steps li::before{width:32px;height:32px}
+  .foot{grid-template-columns:1fr;padding:2.7rem 1.2rem;gap:1.8rem}
+  .foot p{max-width:420px}
+  .legal{font-size:.7rem;line-height:1.6}
+}
+@media(max-width:380px){
+  .stack{grid-template-columns:1fr}
+  .stack .tall{grid-row:auto;transform:none}
+  .mock-body{height:260px}
+  .stack .mini{display:grid;grid-template-columns:auto 1fr;align-items:center;column-gap:.7rem}
+  .stack .mini .tag{grid-column:2}
+  .pgrid{grid-template-columns:1fr}
+  .hero-proof{display:grid;grid-template-columns:1fr 1fr}
+}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
+@media(forced-colors:active){.btn,.chip,.opts label,.demo-tab-btn,.faq-list details{border:2px solid ButtonText}.demo-tab-btn.active,.chip[aria-pressed="true"]{border-color:Highlight}}
 
-    .hero-actions {
-      display: flex;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 3.5rem;
-    }
 
-    /* Live Demo / Playground Area */
-    .demo-container {
-      max-width: 1000px;
-      margin: 0 auto 6rem;
-      padding: 0 2rem;
-    }
 
-    .demo-card {
-      background: var(--card-bg);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--border);
-      border-radius: 24px;
-      padding: 2.5rem;
-      box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 40px rgba(59, 130, 246, 0.08);
-      position: relative;
-    }
+/* Monochrome refresh: crisp black, white and soft neutral surfaces */
+:root{
+  --bg:#ffffff;
+  --surface:#ffffff;
+  --surface-soft:#f5f5f5;
+  --ink:#080808;
+  --muted:#555555;
+  --line:#dedede;
+  --blue:#080808;
+  --blue-dark:#222222;
+  --cyan:#777777;
+  --violet:#999999;
+  --navy:#080808;
+  --shadow:0 20px 55px rgba(0,0,0,.07);
+  --shadow-sm:0 8px 24px rgba(0,0,0,.06);
+}
+body::before{background:radial-gradient(ellipse at 8% 8%,rgba(0,0,0,.035),transparent 30%),radial-gradient(ellipse at 92% 28%,rgba(0,0,0,.025),transparent 25%)}
+h1 span{color:#111;background:none;-webkit-text-fill-color:#111}
+.eyebrow{color:#111;background:#f5f5f5;border-color:#e5e5e5}
+.eyebrow::before{background:#111;box-shadow:0 0 0 4px rgba(0,0,0,.08)}
+.announcement{background:#080808;color:#f5f5f5}
+.announcement .announcement-dot{background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.13)}
+.announcement a{color:#fff;text-decoration:underline;text-underline-offset:3px}
+header{background:rgba(255,255,255,.92);border-bottom-color:#e5e5e5}
+.brand-icon{background:#080808;color:#fff;box-shadow:0 7px 16px rgba(0,0,0,.13)}
+.nav-link{color:#555}
+.nav-link:hover{color:#000;background:#f1f1f1}
+.btn{color:#080808;background:#fff;border-color:#d7d7d7;box-shadow:0 3px 0 rgba(0,0,0,.025)}
+.btn:hover{background:#f5f5f5;border-color:#999;box-shadow:0 10px 20px rgba(0,0,0,.07)}
+.btn-primary{background:#080808;color:#fff;border-color:#080808;box-shadow:0 8px 20px rgba(0,0,0,.14)}
+.btn-primary:hover{background:#292929;color:#fff;border-color:#292929;box-shadow:0 12px 24px rgba(0,0,0,.17)}
+.btn-light{background:#fff;color:#080808;border-color:#fff}
+.btn-light:hover{background:#ededed;border-color:#ededed}
+.chip[aria-pressed="true"],.demo-tab-btn.active{background:#080808;border-color:#080808;color:#fff}
+.hero-visual,.visual-window,.feature-visual,.demo-visual{border-color:#e5e5e5}
+.card,.panel,.feature-card,.pcard,.interactive-box,.story .item,.cmds>div{border-color:#e5e5e5}
+.feature-card:hover,.pcard:hover{border-color:#bdbdbd;box-shadow:0 18px 36px rgba(0,0,0,.08)}
+.tile,.feature-icon,.profile-icon{background:#f0f0f0!important;color:#111!important}
+.band,.cta-band{background:#080808!important;color:#fff!important}
+.band h2,.band p,.cta-band h2,.cta-band p{color:#fff}
+footer{background:#080808;color:#f2f2f2}
+.foot .brand-icon{background:#fff;color:#080808}
+:focus-visible{outline-color:#000;box-shadow:0 0 0 5px rgba(0,0,0,.1)}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
 
-    .demo-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-bottom: 1px solid var(--border);
-      padding-bottom: 1.25rem;
-      margin-bottom: 1.5rem;
-    }
-
-    .demo-tabs {
-      display: flex;
-      gap: 0.5rem;
-    }
-
-    .demo-tab-btn {
-      padding: 0.5rem 1rem;
-      border-radius: 8px;
-      background: transparent;
-      border: 1px solid transparent;
-      color: var(--text-muted);
-      cursor: pointer;
-      font-weight: 600;
-      transition: all 0.2s;
-    }
-    .demo-tab-btn.active {
-      background: rgba(59, 130, 246, 0.15);
-      border-color: rgba(59, 130, 246, 0.4);
-      color: #60a5fa;
-    }
-
-    .demo-content {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 2rem;
-      text-align: left;
-    }
-
-    @media (max-width: 768px) {
-      .demo-content {
-        grid-template-columns: 1fr;
-      }
-      h1 { font-size: 2.5rem; }
-    }
-
-    .interactive-box {
-      background: rgba(0, 0, 0, 0.3);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.5rem;
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .features-grid {
-      max-width: 1100px;
-      margin: 0 auto 6rem;
-      padding: 0 2rem;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 1.5rem;
-    }
-
-    .feature-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 2rem;
-      transition: transform 0.2s, border-color 0.2s;
-    }
-    .feature-card:hover {
-      transform: translateY(-4px);
-      border-color: rgba(59, 130, 246, 0.4);
-    }
-
-    .feature-icon {
-      font-size: 2rem;
-      margin-bottom: 1rem;
-      display: inline-block;
-    }
-
-    .feature-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-desc {
-      color: var(--text-muted);
-      font-size: 0.95rem;
-    }
-
-    footer {
-      border-top: 1px solid var(--border);
-      padding: 3rem 2rem;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.9rem;
-    }
-  </style>
+</style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <symbol id="i-logo" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.8"/><path d="M5 8.5l7 1.5 7-1.5M12 10v4.5M9 20l3-5.5 3 5.5"/></symbol>
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-type" viewBox="0 0 24 24"><path d="M4 7V5h16v2M9 19h6M12 5v14"/></symbol>
+    <symbol id="i-gaze" viewBox="0 0 24 24"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z"/><path d="M9 12l2 2 4-4"/></symbol>
+    <symbol id="i-captions" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 11h3M7 15h5M14 11h3M15 15h2"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11M7 11l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-code" viewBox="0 0 24 24"><path d="M8 8l-4 4 4 4M16 8l4 4-4 4M14 5l-4 14"/></symbol>
+    <symbol id="i-ear" viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 3-2 4-3 6s-1 4-3.5 4A3.5 3.5 0 0 1 8 15.5"/><path d="M10 9a2 2 0 0 1 4 0"/></symbol>
+    <symbol id="i-pointer" viewBox="0 0 24 24"><path d="M5 4l6 15 2.2-6.3L19.5 10.5 5 4z"/></symbol>
+    <symbol id="i-brain" viewBox="0 0 24 24"><path d="M9 4a3 3 0 0 0-3 3 3 3 0 0 0-2 5 3 3 0 0 0 2 5 3 3 0 0 0 5 1V5a2 2 0 0 0-2-1z"/><path d="M15 4a3 3 0 0 1 3 3 3 3 0 0 1 2 5 3 3 0 0 1-2 5 3 3 0 0 1-5 1V5a2 2 0 0 1 2-1z"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 10v4h4l5 4V6L8 10H4z"/><path d="M16.5 9a4 4 0 0 1 0 6M19 6.5a8 8 0 0 1 0 11"/></symbol>
+    <symbol id="i-contrast" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24"><path d="M6 16v-5a6 6 0 0 1 12 0v5l1.5 2h-15L6 16z"/><path d="M10 20a2 2 0 0 0 4 0"/></symbol>
+    <symbol id="i-reset" viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 3-6.2M4 4v4h4"/></symbol>
+    <symbol id="i-bold" viewBox="0 0 24 24"><path d="M7 5h6a3.5 3.5 0 0 1 0 7H7zM7 12h7a3.5 3.5 0 0 1 0 7H7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-layout" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 9v11"/></symbol>
+    <symbol id="i-sparkle" viewBox="0 0 24 24"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M18 6l-2.5 2.5M8.5 15.5L6 18"/></symbol>
+  </defs>
+</svg>
 
-  <a href="#main" class="skip-link">Skip to main content</a>
+<a href="#main" class="skip-link">Skip to main content</a>
 
-  <header role="banner">
-    <a href="#" class="brand">
-      <div class="brand-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"></circle>
-          <path d="M12 8v8"></path>
-          <path d="M8 12h8"></path>
-        </svg>
+<div class="announcement" role="note">
+  <span class="announcement-dot" aria-hidden="true"></span>
+  <span>THINK AI 4.0</span><span aria-hidden="true">·</span><span>Accessibility Track</span>
+  <a href="#features">Explore the toolkit <span aria-hidden="true">↗</span></a>
+</div>
+<header id="top">
+  <a href="#" class="brand" aria-label="OmniAccess AI home">
+    <span class="brand-icon" aria-hidden="true"><svg class="ic"><use href="#i-logo"/></svg></span>
+    <span>OmniAccess AI</span>
+  </a>
+  <button class="menu-toggle" type="button" aria-controls="main-nav" aria-expanded="false" aria-label="Open navigation menu">
+    <span class="menu-bars" aria-hidden="true"><span></span><span></span><span></span></span><span>Menu</span>
+  </button>
+  <nav class="nav-links" id="main-nav" aria-label="Main navigation">
+    <a href="#features" class="nav-link">Features</a>
+    <a href="#how" class="nav-link">How it works</a>
+    <a href="#demo" class="nav-link">Demo</a>
+    <a href="#privacy" class="nav-link">Privacy</a>
+    <a href="#voice-commands" class="nav-link">Commands</a>
+    <a href="#install" class="btn btn-primary btn-sm nav-cta"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Install</span></a>
+  </nav>
+</header>
+
+<main id="main">
+  <div class="hero">
+    <div>
+      <p class="eyebrow">THINK AI 4.0 · Accessibility track</p>
+      <h1>Make the web work for <span>every input and output.</span></h1>
+      <p class="lead">OmniAccess AI is a Chrome extension that adapts to the person using it: voice navigation, spoken image descriptions, plain-language text, live captions, and an auditor that fixes accessibility problems on the page.</p>
+      <div class="row">
+        <a href="#demo" class="btn btn-primary"><span>Try the demo</span><svg class="ic" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a href="#install" class="btn"><span>Install the extension</span></a>
       </div>
-      <span>OmniAccess AI</span>
-    </a>
-
-    <nav class="nav-links" aria-label="Main Navigation">
-      <a href="#features" class="nav-link">Features</a>
-      <a href="#demo" class="nav-link">Interactive Test</a>
-      <a href="#install" class="btn btn-primary">Install Extension</a>
-    </nav>
-  </header>
-
-  <main id="main">
-    <section class="hero">
-      <div class="badge">
-        <span>✨ Powered by Gemini Vision &amp; Chrome APIs</span>
+      <div class="hero-proof" aria-label="Product principles">
+        <span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Multiple ways to interact</span>
+        <span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Controls stay in your hands</span>
+        <span><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg> Privacy-aware by design</span>
       </div>
-      <h1>Web Accessibility Without Barriers.</h1>
-      <p>
-        OmniAccess AI is a multimodal Chrome Assistant delivering voice navigation, AI chart and meme descriptions, cognitive text simplification, webcam gaze tracking, and real-time WCAG 2.2 auditing.
-      </p>
-
-      <div class="hero-actions">
-        <a href="#demo" class="btn btn-primary">Try Interactive Web Demo</a>
-        <a href="#install" class="btn btn-secondary">Installation Guide</a>
-      </div>
-    </section>
-
-    <!-- ======= WELCOME / ENABLE FEATURES PROMPT ======= -->
-    <section id="welcome-prompt" style="max-width: 860px; margin: 0 auto 2.5rem; padding: 0 2rem;">
-      <div style="background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.08)); border: 1px solid rgba(59,130,246,0.3); border-radius: 20px; padding: 2rem 2.5rem;">
-        <h2 style="font-size: 1.4rem; font-weight: 800; margin-bottom: 0.5rem;">👋 Welcome to OmniAccess AI</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 1.5rem;">
-          Nothing is enabled automatically. Choose which accessibility features you'd like to try:
-        </p>
-
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.75rem;">
-          <!-- Voice Nav -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;" id="opt-voice-label">
-            <input type="checkbox" id="opt-voice" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>🎙️ Voice Navigation</span>
-          </label>
-
-          <!-- Read Aloud -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
-            <input type="checkbox" id="opt-readaloud" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>🔊 Read Aloud (TTS)</span>
-          </label>
-
-          <!-- High Contrast -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
-            <input type="checkbox" id="opt-contrast" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>🎨 High Contrast</span>
-          </label>
-
-          <!-- Bionic Reading -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
-            <input type="checkbox" id="opt-bionic" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>📖 Bionic Reading</span>
-          </label>
-
-          <!-- Text Spacing -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
-            <input type="checkbox" id="opt-spacing" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>📐 Text Spacing</span>
-          </label>
-
-          <!-- Audio Chimes -->
-          <label style="display: flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 10px; padding: 0.75rem 1rem; cursor: pointer; transition: border-color 0.2s;">
-            <input type="checkbox" id="opt-chimes" style="width: 16px; height: 16px; cursor: pointer;" />
-            <span>🔔 Audio Chimes</span>
-          </label>
-        </div>
-
-        <div style="margin-top: 1.25rem; display: flex; gap: 0.75rem; flex-wrap: wrap; align-items: center;">
-          <button id="btn-apply-features" class="btn btn-primary" style="padding: 0.6rem 1.4rem; font-size: 0.95rem;">
-            ✅ Apply Selected Features
-          </button>
-          <button id="btn-reset-features" class="btn btn-secondary" style="padding: 0.6rem 1.1rem; font-size: 0.9rem;">
-            ↩ Reset All
-          </button>
-          <span id="features-status" style="font-size: 0.88rem; color: var(--success); font-weight: 600;"></span>
-        </div>
-      </div>
-    </section>
-
-    <!-- Interactive Simulator -->
-    <section id="demo" class="demo-container">
-      <div class="demo-card">
-        <div class="demo-header">
-          <div>
-            <h2 style="font-size: 1.4rem; font-weight: 800;">Multimodal Accessibility Playground</h2>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Test alternative inputs and outputs directly on this page</p>
-          </div>
-          <div class="demo-tabs" role="tablist">
-            <button class="demo-tab-btn active" id="tab-voice">Voice &amp; Audio</button>
-            <button class="demo-tab-btn" id="tab-sim">Text Simplifier</button>
-            <button class="demo-tab-btn" id="tab-contrast">High Contrast</button>
-          </div>
-        </div>
-
-        <div class="demo-content">
-          <!-- Tab 1: Voice & Audio -->
-          <div id="panel-tab-voice" style="display: contents;">
-            <div class="interactive-box">
-              <h3 style="font-size: 1.1rem; color: #60a5fa;">🎤 Interactive Voice & Audio Sandbox</h3>
-              <p style="font-size: 0.95rem; color: #cbd5e1;">
-                Test real-time Speech Recognition navigation and audio feedback directly in your browser.
-              </p>
-              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
-                <button class="btn btn-primary" id="btn-demo-mic" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  🎙️ Start Voice Test
-                </button>
-                <button class="btn btn-secondary" id="btn-demo-chime" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  🔔 Test Audio Chime
-                </button>
-              </div>
-              <div id="voice-test-feedback" style="font-size: 0.88rem; color: #60a5fa; min-height: 24px; font-weight: 500;"></div>
-            </div>
-
-            <div class="interactive-box">
-              <h3 style="font-size: 1.1rem; color: #60a5fa;">Live Voice &amp; Shortcut HUD</h3>
-              <p style="font-size: 0.9rem; color: var(--text-muted);">
-                Press <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); color: #fff;">Alt</kbd> + <kbd style="background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); color: #fff;">A</kbd> to toggle the floating accessibility dock!
-              </p>
-              <div style="padding: 1rem; background: rgba(255,255,255,0.03); border-radius: 8px; border: 1px dashed var(--border);">
-                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 700;">Try Saying:</span>
-                <ul style="font-size: 0.85rem; margin-top: 0.5rem; padding-left: 1.25rem; color: #cbd5e1; line-height: 1.6;">
-                  <li><strong>Media:</strong> "play" / "pause" / "volume up" / "mute"</li>
-                  <li><strong>Laptop View:</strong> "brightness up" / "dim screen" / "zoom in"</li>
-                  <li><strong>Navigation:</strong> "show numbers" (click badges) / "click 1"</li>
-                  <li><strong>Scrolling:</strong> "scroll down" / "scroll up" / "go to top"</li>
-                  <li><strong>Mic Control:</strong> "stop listening" / "turn off mic"</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
-          <!-- Tab 2: Text Simplifier -->
-          <div id="panel-tab-sim" style="display: none;">
-            <div class="interactive-box" style="grid-column: 1 / -1;">
-              <h3 style="font-size: 1.1rem; color: #60a5fa;">🧠 Cognitive Text Simplifier & Read-Aloud</h3>
-              <p id="demo-sample-text" style="font-size: 1rem; line-height: 1.7; background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 8px; border-left: 3px solid #3b82f6;">
-                "The implementation of sophisticated cognitive simplification algorithms facilitates expeditious comprehension of labyrinthine conceptual frameworks."
-              </p>
-              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                <button class="btn btn-secondary" id="btn-demo-simplify" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  ✨ Simplify This Text
-                </button>
-                <button class="btn btn-secondary" id="btn-demo-speak" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  🔊 Read Aloud
-                </button>
-                <button class="btn btn-secondary" id="btn-demo-bionic" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  📖 Toggle Bionic Reading
-                </button>
-              </div>
-              <div id="demo-status" style="font-size: 0.88rem; color: var(--success); font-weight: 600; min-height: 22px;"></div>
-            </div>
-          </div>
-
-          <!-- Tab 3: High Contrast -->
-          <div id="panel-tab-contrast" style="display: none;">
-            <div class="interactive-box" style="grid-column: 1 / -1;">
-              <h3 style="font-size: 1.1rem; color: #60a5fa;">🎨 High-Contrast & Vision Themes</h3>
-              <p style="font-size: 0.95rem; color: var(--text-muted);">
-                Switch contrast modes instantly to make text and elements crisp and readable for users with low vision or photophobia.
-              </p>
-              <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.5rem;">
-                <button class="btn btn-secondary" id="btn-theme-yellow" style="font-size: 0.85rem; padding: 0.55rem 1.1rem; background: #000; color: #ffff00; border: 1px solid #ffff00;">
-                  🟡 Yellow on Black
-                </button>
-                <button class="btn btn-secondary" id="btn-theme-inverted" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  🔄 Invert / High Contrast
-                </button>
-                <button class="btn btn-secondary" id="btn-theme-reset" style="font-size: 0.85rem; padding: 0.55rem 1.1rem;">
-                  ↩ Reset Theme
-                </button>
-              </div>
-              <div id="contrast-status" style="font-size: 0.88rem; color: #60a5fa; font-weight: 600; min-height: 22px; margin-top: 0.25rem;"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ======= VOICE COMMANDS REFERENCE ======= -->
-    <section id="voice-commands" style="max-width: 860px; margin: 0 auto 4rem; padding: 0 2rem;">
-      <h2 style="font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; text-align: center;">🎙️ Voice Command Reference</h2>
-      <p style="text-align: center; color: var(--text-muted); font-size: 0.95rem; margin-bottom: 2rem;">
-        Enable Voice Navigation from the panel, then speak any of these commands.
-      </p>
-
-      <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
-
-        <!-- Navigation -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🧭 Navigation</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"show numbers"</code> — badge all links/buttons</li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"click 3"</code> — click badge #3</li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"click search"</code> — click by label</li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"hide numbers"</code> — remove badges</li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go back"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go forward"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"reload"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"refresh"</code></li>
-          </ul>
-        </div>
-
-        <!-- Scrolling -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">↕️ Scrolling</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"scroll down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"down"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"scroll up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"up"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go to top"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"top"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"go to bottom"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"bottom"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"page down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"page up"</code></li>
-          </ul>
-        </div>
-
-        <!-- Media & Playback -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🎬 Media & Playback</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"play"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"play video"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"resume"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"pause"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"pause video"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"volume up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"volume down"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"mute"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"unmute"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fullscreen"</code></li>
-          </ul>
-        </div>
-
-        <!-- Screen & Zoom -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🖥️ Screen & Zoom</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"zoom in"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"zoom out"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"brightness up"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"make brighter"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"brightness down"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"dim screen"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"high contrast"</code> — toggle contrast</li>
-          </ul>
-        </div>
-
-        <!-- Reading & AI -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🧠 Reading & AI</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read page"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read aloud"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop reading"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"simplify text"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"plain text"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"describe image"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"read chart"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"dyslexia font"</code> — toggle font</li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"captions"</code> — toggle captions</li>
-          </ul>
-        </div>
-
-        <!-- Mic & Accessibility -->
-        <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 1.25rem;">
-          <h3 style="font-size: 1rem; font-weight: 700; color: #60a5fa; margin-bottom: 0.75rem;">🎤 Mic & Audits</h3>
-          <ul style="list-style: none; display: flex; flex-direction: column; gap: 0.4rem; font-size: 0.88rem; color: var(--text-muted);">
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"stop listening"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"turn off mic"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"audit page"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"wcag audit"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"auto fix"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fix issues"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"help"</code> / <code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"voice commands"</code></li>
-            <li><code style="color: #fff; background: rgba(255,255,255,0.08); padding: 1px 6px; border-radius: 4px;">"fill [field] with [value]"</code></li>
-          </ul>
-        </div>
-
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features" class="features-grid">
-      <div class="feature-card">
-        <span class="feature-icon">🎙️</span>
-        <h3 class="feature-title">Hands-Free Voice Control</h3>
-        <p class="feature-desc">Navigate any website using intuitive voice commands. Overlay numbered markers on all links and click elements hands-free.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="feature-icon">👁️</span>
-        <h3 class="feature-title">Gemini Vision VLM</h3>
-        <p class="feature-desc">Deep AI descriptions for charts, infographics, UI diagrams, and memes. Also operates in 100% offline heuristic mode.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="feature-icon">🧠</span>
-        <h3 class="feature-title">Cognitive Text Simplifier</h3>
-        <p class="feature-desc">Adjustable reading levels (Elementary, Plain English, Executive Summary) paired with Lexend and OpenDyslexic typography.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="feature-icon">👀</span>
-        <h3 class="feature-title">Webcam Gaze &amp; Switch Scan</h3>
-        <p class="feature-desc">Private, 100% on-device gaze tracking via webcam dwell-click, plus automated keyboard switch scanning.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="feature-icon">🛡️</span>
-        <h3 class="feature-title">Automated WCAG 2.2 Auditor</h3>
-        <p class="feature-desc">Instantly inspect any webpage for contrast ratios, missing alt-tags, and unlabelled form controls, with one-click auto-fixes.</p>
-      </div>
-
-      <div class="feature-card">
-        <span class="feature-icon">💬</span>
-        <h3 class="feature-title">Live Captions &amp; Sound Labels</h3>
-        <p class="feature-desc">On-screen speech-to-text with multi-speaker detection and real-time auditory badges like [Music] and [Applause].</p>
-      </div>
-    </section>
-
-    <!-- Install Guide -->
-    <section id="install" style="max-width: 860px; margin: 0 auto 6rem; padding: 0 2rem; text-align: center;">
-      <h2 style="font-size: 2.2rem; font-weight: 800; margin-bottom: 0.75rem;">Get OmniAccess AI for Chrome</h2>
-      <p style="color: var(--text-muted); font-size: 1rem; margin-bottom: 2rem;">
-        Install on any computer in under a minute — no development experience required.
-      </p>
-
-      <div style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 20px; padding: 2.5rem; text-align: left; box-shadow: 0 10px 40px rgba(0,0,0,0.5);">
-        
-        <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.5rem; margin-bottom: 2rem; padding-bottom: 1.75rem; border-bottom: 1px solid var(--border);">
-          <div>
-            <h3 style="font-size: 1.25rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem;">Download Extension Package</h3>
-            <p style="color: var(--text-muted); font-size: 0.9rem;">Clean, production-ready build for Google Chrome, Brave, and Edge.</p>
-          </div>
-          <a href="omniaccess-ai-extension.zip" download="omniaccess-ai-extension.zip" class="btn btn-primary" style="font-size: 1rem; padding: 0.85rem 1.6rem; display: inline-flex; align-items: center; gap: 8px;">
-            <span>⬇️ Download Extension (.ZIP)</span>
-          </a>
-        </div>
-
-        <h4 style="font-size: 1.05rem; font-weight: 700; color: #60a5fa; margin-bottom: 1rem;">Simple 3-Step Setup for Any User:</h4>
-        <ol style="padding-left: 1.5rem; display: flex; flex-direction: column; gap: 1rem; color: #cbd5e1; font-size: 0.95rem; line-height: 1.6;">
-          <li>
-            <strong style="color: #fff;">Download &amp; Extract:</strong> Download the <code style="color: #60a5fa; background: rgba(59,130,246,0.1); padding: 2px 6px; border-radius: 4px;">omniaccess-ai-extension.zip</code> file above and extract / unzip it to any folder on your computer.
-          </li>
-          <li>
-            <strong style="color: #fff;">Open Chrome Extensions:</strong> In Chrome (or Edge/Brave), navigate to <code style="color: #60a5fa; background: rgba(59,130,246,0.1); padding: 2px 6px; border-radius: 4px;">chrome://extensions</code> and switch on the <strong style="color: #fff;">Developer mode</strong> toggle in the top-right corner.
-          </li>
-          <li>
-            <strong style="color: #fff;">Load Extension:</strong> Click the <strong style="color: #fff;">"Load unpacked"</strong> button in the top-left corner and select the extracted folder. OmniAccess AI is now installed and ready to assist you on any website!
-          </li>
-        </ol>
-
-        <div style="margin-top: 2rem; background: rgba(59,130,246,0.08); border-left: 4px solid #3b82f6; border-radius: 8px; padding: 1rem 1.25rem; font-size: 0.88rem; color: #94a3b8;">
-          💡 <strong style="color: #fff;">Chrome Web Store Coming Soon:</strong> OmniAccess AI is currently in submission for the official Chrome Web Store. For now, the standalone unpacked ZIP above offers full access with zero restrictions.
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer role="contentinfo" style="padding: 3rem 2rem; border-top: 1px solid var(--border); text-align: center; background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(12px);">
-    <div style="max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; align-items: center; gap: 1.25rem;">
-      <div>
-        <h4 style="font-size: 1.1rem; font-weight: 700; color: #f8fafc; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 0.75rem;">
-          Created By
-        </h4>
-        <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px; margin-bottom: 0.5rem;">
-          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 0.95rem; color: #f1f5f9;">
-            Arnav Chheda
-          </span>
-          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 0.95rem; color: #f1f5f9;">
-            Adwit Gadgil
-          </span>
-          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 0.95rem; color: #f1f5f9;">
-            Sai Dighe
-          </span>
-          <span style="background: rgba(255, 255, 255, 0.06); border: 1px solid rgba(255, 255, 255, 0.12); padding: 8px 18px; border-radius: 9999px; font-weight: 600; font-size: 0.95rem; color: #f1f5f9;">
-            Ishan Gupta
-          </span>
-        </div>
-      </div>
-      <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem;">
-        OmniAccess AI &mdash; Built with privacy-first on-device intelligence for <strong>Think AI TCET</strong>.
-      </p>
     </div>
-  </footer>
 
-  <script src="website-demo.js"></script>
+    <div class="stack">
+      <div class="panel-c tall" role="img" aria-label="Illustration of a web page with numbered voice-control badges, a voice command reading click 3, and a live caption bar.">
+        <div class="mock-bar" aria-hidden="true"><i></i><i></i><i></i><span>example-news-site.com</span></div>
+        <div class="mock-body" aria-hidden="true">
+          <div class="ln h"></div><div class="ln w90"></div><div class="ln w70"></div><div class="ln w80"></div><div class="ln w50"></div><div class="ln w90"></div><div class="ln w70"></div>
+          <div class="mock-img"></div>
+          <span class="mock-badge b1">1</span><span class="mock-badge b2">2</span><span class="mock-badge b3">3</span>
+          <div class="mock-hud">“click 3”</div>
+          <div class="mock-cap">[Applause] Speaker 1: Welcome, everyone.</div>
+        </div>
+      </div>
+      <div class="panel-c mini">
+        <div class="t"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-eye"/></svg></span>Image description</div>
+        <p>Bar chart. Revenue rises each year, with the largest jump in 2024.</p>
+        <span class="tag">Example output</span>
+      </div>
+      <div class="panel-c mini">
+        <div class="t"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-captions"/></svg></span>Live captions</div>
+        <p>Speaker labels and sound tags such as [Music] and [Applause].</p>
+        <span class="tag">Example output</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="principles-strip" aria-label="Core principles">
+      <div class="principle-item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-pointer"/></svg></span><div><strong>More than one way in</strong><span>Voice, keyboard, gaze and switch-friendly flows.</span></div></div>
+      <div class="principle-item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-type"/></svg></span><div><strong>Content on your terms</strong><span>Adjust how a page looks, sounds and reads.</span></div></div>
+      <div class="principle-item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-shield"/></svg></span><div><strong>Clear choices</strong><span>Try features deliberately and reset them anytime.</span></div></div>
+    </div>
+    <section id="welcome-prompt" aria-labelledby="welcome-h">
+      <div class="panel">
+        <h2 id="welcome-h" class="sec" style="font-size:1.4rem">Choose what to try</h2>
+        <p class="small" style="margin-top:.4rem">Nothing is enabled automatically. Pick the features you want on this page.</p>
+        <div class="opts">
+          <label id="opt-voice-label"><input type="checkbox" id="opt-voice" /><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg><span>Voice navigation</span></label>
+          <label><input type="checkbox" id="opt-readaloud" /><svg class="ic" aria-hidden="true"><use href="#i-volume"/></svg><span>Read aloud (TTS)</span></label>
+          <label><input type="checkbox" id="opt-contrast" /><svg class="ic" aria-hidden="true"><use href="#i-contrast"/></svg><span>High contrast</span></label>
+          <label><input type="checkbox" id="opt-bionic" /><svg class="ic" aria-hidden="true"><use href="#i-bold"/></svg><span>Bionic reading</span></label>
+          <label><input type="checkbox" id="opt-spacing" /><svg class="ic" aria-hidden="true"><use href="#i-sliders"/></svg><span>Text spacing</span></label>
+          <label><input type="checkbox" id="opt-chimes" /><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><span>Audio chimes</span></label>
+        </div>
+        <div class="row">
+          <button id="btn-apply-features" class="btn btn-primary btn-sm"><svg class="ic" aria-hidden="true"><use href="#i-check"/></svg><span class="lbl">Apply selected</span></button>
+          <button id="btn-reset-features" class="btn btn-sm"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg><span class="lbl">Reset all</span></button>
+          <span id="features-status" class="status" role="status" aria-live="polite"></span>
+        </div>
+      </div>
+    </section>
+
+    <section id="features" aria-labelledby="feat-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Features</p>
+          <h2 class="sec" id="feat-h">Six tools in one extension</h2>
+          <p class="sub">Built for visual, hearing, motor and cognitive needs. Filter by who it helps.</p>
+        </div>
+        <div class="row" role="group" aria-label="Filter features by need">
+          <button class="chip" data-filter="all" aria-pressed="true">All</button>
+          <button class="chip" data-filter="vision" aria-pressed="false">Vision</button>
+          <button class="chip" data-filter="hearing" aria-pressed="false">Hearing</button>
+          <button class="chip" data-filter="motor" aria-pressed="false">Motor</button>
+          <button class="chip" data-filter="cognitive" aria-pressed="false">Cognitive</button>
+        </div>
+      </div>
+      <p id="filter-status" class="small" role="status" aria-live="polite" style="min-height:1.4rem;margin-bottom:.6rem"></p>
+      <div class="fgrid">
+        <article class="fcard feature-card" data-cat="vision motor">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-mic"/></svg></div>
+          <span class="cat">Vision · Motor</span><h3>Hands-free voice control</h3>
+          <p>Say “show numbers”, then “click 4”. Scroll, go back, fill forms and control media by voice.</p>
+        </article>
+        <article class="fcard feature-card" data-cat="vision">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-eye"/></svg></div>
+          <span class="cat">Vision</span><h3>AI image and page descriptions</h3>
+          <p>AI vision describes charts, infographics and interfaces aloud, with an offline fallback and automatic alt text.</p>
+        </article>
+        <article class="fcard feature-card" data-cat="cognitive vision">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-type"/></svg></div>
+          <span class="cat">Cognitive · Vision</span><h3>Text simplifier</h3>
+          <p>Three reading levels, dyslexia-friendly fonts, bionic reading and word-highlighted read-aloud.</p>
+        </article>
+        <article class="fcard feature-card" data-cat="motor">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-gaze"/></svg></div>
+          <span class="cat">Motor</span><h3>Gaze and switch access</h3>
+          <p>Webcam gaze tracking with dwell-click, processed on your device, plus automatic keyboard scanning.</p>
+        </article>
+        <article class="fcard feature-card" data-cat="vision motor cognitive">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-shield"/></svg></div>
+          <span class="cat">All users</span><h3>WCAG 2.2 auditor</h3>
+          <p>Finds missing alt text, low contrast, unlabelled controls and heading problems, then fixes what it can.</p>
+        </article>
+        <article class="fcard feature-card" data-cat="hearing">
+          <div class="tile" aria-hidden="true"><svg class="ic"><use href="#i-captions"/></svg></div>
+          <span class="cat">Hearing</span><h3>Live captions</h3>
+          <p>On-screen speech-to-text with speaker labels and sound tags such as [Music] and [Applause].</p>
+        </article>
+      </div>
+    </section>
+
+    <section id="how" aria-labelledby="how-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">How it works</p>
+          <h2 class="sec" id="how-h">Choose how to interact. We translate.</h2>
+        </div>
+      </div>
+      <div class="story">
+        <div class="big">
+          <div class="tile" aria-hidden="true">
+            <div class="flow">
+              <b>Voice</b><b>Gaze</b><b>Switch</b>
+              <svg class="ic"><use href="#i-arrow"/></svg>
+              <b>OmniAccess</b>
+              <svg class="ic"><use href="#i-arrow"/></svg>
+              <b>Audio</b><b>Captions</b><b>Simple text</b>
+            </div>
+          </div>
+          <span class="num">Step 1</span>
+          <h3>Pick the input that suits you</h3>
+          <p>Voice, webcam gaze with dwell-click, switch scanning, or touch with large targets. Switch any time.</p>
+        </div>
+        <div class="side">
+          <div class="item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-layout"/></svg></span><div><span class="num">Step 2</span><h3>The extension reads the page</h3><p>It maps links, images, forms and text. An AI model is called only if you add your own key.</p></div></div>
+          <div class="item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-volume"/></svg></span><div><span class="num">Step 3</span><h3>You get the output you need</h3><p>Spoken descriptions, captions, simplified text, high-contrast themes and one-click fixes.</p></div></div>
+          <div class="item"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-lock"/></svg></span><div><span class="num">Privacy</span><h3>Local by default</h3><p>Gaze, switch access and the offline simplifier run on your device.</p></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="who" aria-labelledby="who-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Who it helps</p>
+          <h2 class="sec" id="who-h">One-click profiles for different needs</h2>
+          <p class="sub">Each profile switches on the right tools.</p>
+        </div>
+      </div>
+      <div class="pgrid">
+        <div class="pcard"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-contrast"/></svg></span><h3>Low vision</h3><p>High contrast, large cursor, zoom.</p></div>
+        <div class="pcard"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-eye"/></svg></span><h3>Blind</h3><p>Voice navigation, image descriptions, audio cues.</p></div>
+        <div class="pcard"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-pointer"/></svg></span><h3>Motor</h3><p>Switch scanning, gaze, voice.</p></div>
+        <div class="pcard"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-brain"/></svg></span><h3>Dyslexia and cognitive</h3><p>Simplified text, dyslexia fonts, bionic reading.</p></div>
+        <div class="pcard"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-ear"/></svg></span><h3>Deaf and hard of hearing</h3><p>Live captions, sound labels, visual alerts.</p></div>
+      </div>
+    </section>
+
+    <section id="privacy" aria-labelledby="privacy-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Privacy &amp; control</p>
+          <h2 class="sec" id="privacy-h">Accessibility should feel empowering.</h2>
+          <p class="sub">Make a choice, understand what it does, and stay in control of your browsing experience.</p>
+        </div>
+      </div>
+      <div class="privacy-grid">
+        <article class="privacy-card"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-lock"/></svg></span><h3>Local where possible</h3><p>The project describes gaze tracking, switch access and its offline simplifier as on-device features. Keep sensitive interactions transparent and predictable.</p></article>
+        <article class="privacy-card"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-sliders"/></svg></span><h3>You choose what to enable</h3><p>Try the page controls above to select the adjustments you need. No preference is switched on automatically by this demo.</p></article>
+        <article class="privacy-card"><span class="tile" aria-hidden="true"><svg class="ic"><use href="#i-brain"/></svg></span><h3>AI with a clear boundary</h3><p>AI descriptions and simplification require your own API key (Groq by default). The install notes explain when page content may be sent to your chosen provider.</p></article>
+      </div>
+    </section>
+
+    <section id="demo" aria-labelledby="demo-h">
+      <div class="panel demo-card">
+        <div class="demo-head">
+          <div>
+            <h2 id="demo-h" class="sec" style="font-size:1.4rem">Accessibility playground</h2>
+            <p class="small" style="margin-top:.3rem">Test alternative inputs and outputs on this page.</p>
+          </div>
+          <div class="demo-tabs" role="tablist" aria-label="Demo categories">
+            <button class="demo-tab-btn active" id="tab-voice" role="tab" aria-selected="true" aria-controls="pane-voice">Voice and audio</button>
+            <button class="demo-tab-btn" id="tab-sim" role="tab" aria-selected="false" aria-controls="pane-sim" tabindex="-1">Text simplifier</button>
+            <button class="demo-tab-btn" id="tab-contrast" role="tab" aria-selected="false" aria-controls="pane-contrast" tabindex="-1">High contrast</button>
+          </div>
+        </div>
+
+        <div id="panel-tab-voice" style="display:contents">
+          <div class="pane two" id="pane-voice" role="tabpanel" aria-labelledby="tab-voice" tabindex="0">
+            <div class="interactive-box">
+              <h3>Voice and audio sandbox</h3>
+              <p>Test real-time speech recognition and audio feedback in your browser.</p>
+              <div class="row">
+                <button class="btn btn-primary btn-sm" id="btn-demo-mic"><svg class="ic" aria-hidden="true"><use href="#i-mic"/></svg><span class="lbl">Start voice test</span></button>
+                <button class="btn btn-sm" id="btn-demo-chime"><svg class="ic" aria-hidden="true"><use href="#i-bell"/></svg><span class="lbl">Test audio chime</span></button>
+              </div>
+              <div id="voice-test-feedback" class="note" role="status" aria-live="polite"></div>
+            </div>
+            <div class="interactive-box">
+              <h3>Commands and shortcuts</h3>
+              <p>Press <kbd>Alt</kbd> + <kbd>A</kbd> to toggle the floating accessibility dock.</p>
+              <ul>
+                <li><strong>Media:</strong> “play”, “pause”, “volume up”, “mute”</li>
+                <li><strong>View:</strong> “zoom in”, “brightness up”, “dim screen”</li>
+                <li><strong>Navigate:</strong> “show numbers”, “click 1”</li>
+                <li><strong>Scroll:</strong> “scroll down”, “go to top”</li>
+                <li><strong>Mic:</strong> “stop listening”</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-tab-sim" style="display:none">
+          <div class="pane" id="pane-sim" role="tabpanel" aria-labelledby="tab-sim" tabindex="0">
+            <div class="interactive-box">
+              <h3>Text simplifier and read-aloud</h3>
+              <p id="demo-sample-text">The implementation of sophisticated cognitive simplification algorithms facilitates expeditious comprehension of labyrinthine conceptual frameworks.</p>
+              <div class="row">
+                <button class="btn btn-sm" id="btn-demo-simplify"><svg class="ic" aria-hidden="true"><use href="#i-type"/></svg><span class="lbl">Simplify text</span></button>
+                <button class="btn btn-sm" id="btn-demo-speak"><svg class="ic" aria-hidden="true"><use href="#i-volume"/></svg><span class="lbl">Read aloud</span></button>
+                <button class="btn btn-sm" id="btn-demo-bionic"><svg class="ic" aria-hidden="true"><use href="#i-bold"/></svg><span class="lbl">Bionic reading</span></button>
+              </div>
+              <div id="demo-status" class="status" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="panel-tab-contrast" style="display:none">
+          <div class="pane" id="pane-contrast" role="tabpanel" aria-labelledby="tab-contrast" tabindex="0">
+            <div class="interactive-box">
+              <h3>High-contrast and vision themes</h3>
+              <p>Switch contrast modes instantly for low vision or light sensitivity.</p>
+              <div class="row">
+                <button class="btn btn-sm" id="btn-theme-yellow" style="background:#000;color:#ff0;border-color:#ff0"><svg class="ic" aria-hidden="true"><use href="#i-contrast"/></svg><span class="lbl">Yellow on black</span></button>
+                <button class="btn btn-sm" id="btn-theme-inverted"><svg class="ic" aria-hidden="true"><use href="#i-contrast"/></svg><span class="lbl">Invert colours</span></button>
+                <button class="btn btn-sm" id="btn-theme-reset"><svg class="ic" aria-hidden="true"><use href="#i-reset"/></svg><span class="lbl">Reset theme</span></button>
+              </div>
+              <div id="contrast-status" class="note" role="status" aria-live="polite"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="voice-commands" aria-labelledby="vc-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Reference</p>
+          <h2 class="sec" id="vc-h">Voice commands</h2>
+          <p class="sub">Turn on voice navigation, then say any of these.</p>
+        </div>
+      </div>
+      <div class="cmds">
+        <div><h3>Navigation</h3><ul><li><code>show numbers</code> / <code>hide numbers</code></li><li><code>click 3</code> or <code>click search</code></li><li><code>go back</code> / <code>go forward</code></li><li><code>reload</code></li></ul></div>
+        <div><h3>Scrolling</h3><ul><li><code>scroll down</code> / <code>scroll up</code></li><li><code>go to top</code> / <code>go to bottom</code></li><li><code>page down</code> / <code>page up</code></li></ul></div>
+        <div><h3>Media</h3><ul><li><code>play</code> / <code>pause</code> / <code>resume</code></li><li><code>volume up</code> / <code>volume down</code></li><li><code>mute</code> / <code>fullscreen</code></li></ul></div>
+        <div><h3>Screen and zoom</h3><ul><li><code>zoom in</code> / <code>zoom out</code></li><li><code>brightness up</code> / <code>dim screen</code></li><li><code>high contrast</code></li></ul></div>
+        <div><h3>Reading and AI</h3><ul><li><code>read page</code> / <code>stop reading</code></li><li><code>simplify text</code></li><li><code>describe image</code> / <code>read chart</code></li><li><code>dyslexia font</code> / <code>captions</code></li></ul></div>
+        <div><h3>Mic and audits</h3><ul><li><code>stop listening</code></li><li><code>audit page</code> / <code>auto fix</code></li><li><code>fill [field] with [value]</code></li><li><code>help</code></li></ul></div>
+      </div>
+    </section>
+
+    <section id="faq" aria-labelledby="faq-h">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">A few quick answers</p>
+          <h2 class="sec" id="faq-h">Before you get started</h2>
+          <p class="sub">What to expect from the current extension setup.</p>
+        </div>
+      </div>
+      <div class="faq-list">
+        <details><summary>Do I need an API key to try every feature?</summary><p>No API key is needed to explore the page's built-in demo controls. The project's AI descriptions and AI-assisted simplification require your own API key. Groq is the default provider, and Gemini and xAI Grok also work; the install guide explains where it is added.</p></details>
+        <details><summary>Can I choose which accessibility controls are active?</summary><p>Yes. Use the “Choose what to try” panel to select page-level options, then apply or reset your selection. The separate extension dock has its own controls when the extension is loaded.</p></details>
+        <details><summary>Is the extension available in the Chrome Web Store?</summary><p>The supplied project page says a Chrome Web Store listing is planned. For now, the guide uses Chrome's “Load unpacked” flow with the downloaded extension folder.</p></details>
+        <details><summary>What happens to page content when I use AI features?</summary><p>According to the project's setup notes, page images or text may be sent to your chosen AI provider (Groq by default) when you add a key and use the AI features. Review the extension's permissions and provider terms before using it with sensitive content.</p></details>
+      </div>
+    </section>
+
+    <section id="install" aria-labelledby="inst-h">
+      <div class="band">
+        <h2 id="inst-h">Get OmniAccess AI for Chrome</h2>
+        <p class="lead2">Install in about a minute. Works in Chrome, Brave and Edge. No coding needed.</p>
+        <a href="omniaccess-ai-extension.zip" download="omniaccess-ai-extension.zip" class="btn btn-light"><svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download extension (.zip)</span></a>
+        <ol class="steps">
+          <li><div><strong>Download and extract</strong> <code>omniaccess-ai-extension.zip</code> into any folder.</div></li>
+          <li><div><strong>Open</strong> <code>chrome://extensions</code> and turn on <strong>Developer mode</strong> (top right).</div></li>
+          <li><div><strong>Click “Load unpacked”</strong> and choose the extracted folder. Pin OmniAccess AI to your toolbar.</div></li>
+          <li><div><strong>Optional:</strong> open the side panel, go to <em>AI &amp; Tools</em>, and choose Groq and paste a free API key from console.groq.com to turn on AI descriptions and simplification.</div></li>
+        </ol>
+        <p class="tip">Privacy: gaze tracking, switch access and the offline simplifier run on your device. Page images or text are sent to your chosen AI provider (Groq by default) only if you add an API key. A Chrome Web Store listing is planned.</p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  <div class="foot">
+    <div>
+      <a href="#" class="brand" aria-label="OmniAccess AI home"><span class="brand-icon" aria-hidden="true"><svg class="ic"><use href="#i-logo"/></svg></span><span>OmniAccess AI</span></a>
+      <p>An accessibility assistant for Chrome, built for THINK AI 4.0 at TCET Mumbai.</p>
+    </div>
+    <div>
+      <h2>Product</h2>
+      <ul><li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li><li><a href="#demo">Demo</a></li><li><a href="#install">Install</a></li></ul>
+    </div>
+    <div>
+      <h2>Resources</h2>
+      <ul><li><a href="#voice-commands">Voice commands</a></li><li><a href="https://github.com/Arnav-GC/Think-AI-4.0-Accessibility">Source code</a></li></ul>
+    </div>
+    <div>
+      <h2>Team</h2>
+      <ul><li>Arnav Chheda</li><li>Adwit Gadgil</li><li>Sai Dighe</li><li>Ishan Gupta</li></ul>
+    </div>
+  </div>
+  <div class="legal">© 2026 OmniAccess AI · THINK AI 4.0 · IETE Student Forum, TCET Mumbai</div>
+</footer>
+
+<a class="back-to-top" href="#top" aria-label="Back to top"><svg class="ic" aria-hidden="true" style="transform:rotate(-90deg)"><use href="#i-arrow"/></svg></a>
+<script src="website-demo.js"></script>
+<script src="website-a11y.js"></script>
+<script>
+  // UI-only enhancements: responsive menu and a back-to-top affordance.
+  (() => {
+    const toggle = document.querySelector('.menu-toggle');
+    const nav = document.querySelector('#main-nav');
+    const backToTop = document.querySelector('.back-to-top');
+    if (toggle && nav) {
+      const closeMenu = () => {
+        nav.classList.remove('is-open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Open navigation menu');
+      };
+      toggle.addEventListener('click', () => {
+        const opening = toggle.getAttribute('aria-expanded') !== 'true';
+        toggle.setAttribute('aria-expanded', String(opening));
+        toggle.setAttribute('aria-label', opening ? 'Close navigation menu' : 'Open navigation menu');
+        nav.classList.toggle('is-open', opening);
+      });
+      nav.querySelectorAll('a').forEach(link => link.addEventListener('click', closeMenu));
+      document.addEventListener('keydown', event => { if (event.key === 'Escape') closeMenu(); });
+      window.addEventListener('resize', () => { if (window.innerWidth > 680) closeMenu(); });
+    }
+    if (backToTop) {
+      const updateBackToTop = () => backToTop.classList.toggle('visible', window.scrollY > 520);
+      window.addEventListener('scroll', updateBackToTop, { passive: true });
+      updateBackToTop();
+    }
+  })();
+</script>
 </body>
 </html>

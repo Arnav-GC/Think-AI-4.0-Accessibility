@@ -712,6 +712,7 @@
         <div class="select-group" style="margin-bottom: 12px;">
           <label for="ai-provider-select" class="select-label">Provider</label>
           <select id="ai-provider-select" class="styled-select" aria-describedby="provider-desc">
+            <option value="groq">Groq (GPT-OSS)</option>
             <option value="gemini">Google Gemini</option>
             <option value="grok">Grok (xAI)</option>
           </select>
@@ -727,7 +728,7 @@
               type="password"
               id="api-key-input"
               class="styled-input"
-              placeholder="Enter your Gemini API key…"
+              placeholder="Enter your Groq API key (gsk_...)…"
               autocomplete="off"
               aria-describedby="api-key-desc"
               style="padding-right: 44px;" />
